@@ -1,0 +1,17 @@
+{
+  "name": "employee-masterlist-and-clearance-system",
+  "version": "1.0.0",
+  "description": "May Harvest Corporation - Employee Masterlist, 201 Records & Clearance Management System",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "may-harvest",
+    "employee-masterlist",
+    "clearance-process",
+    "hris"
+  ],
+  "author": "May Harvest Corporation",
+  "license": "ISC"
+}

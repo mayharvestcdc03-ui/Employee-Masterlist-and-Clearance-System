@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Employee Masterlist &amp; Clearance Management System</title>
+<style>
+:root{--bg:#f3f6fb;--card:#fff;--tx:#172033;--mut:#64748b;--ln:#e4e9f1;--in:#fff;--hd:#f7f9fc;--ac:#2563eb;--nv:#172b4d;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#0f141c;--card:#1a212c;--tx:#e6eaf1;--mut:#94a0b4;--ln:#2b3442;--in:#121821;--hd:#202938;--ac:#5b8def}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#0f141c;--card:#1a212c;--tx:#e6eaf1;--mut:#94a0b4;--ln:#2b3442;--in:#121821;--hd:#202938;--ac:#5b8def}
+*{box-sizing:border-box}[hidden]{display:none!important}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;font:14px/1.45 "Segoe UI",Arial,sans-serif;background:var(--bg);color:var(--tx)}
+#login{position:fixed;inset:0;background:var(--nv);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50}
+.lc{width:min(100%,420px);background:var(--card);border-radius:16px;padding:28px}
+.side{width:240px;background:var(--nv);color:#dce6f5;position:fixed;inset:0 auto 0 0;padding:20px 12px;overflow:auto}
+.side h2{font-size:16px;margin:0 8px 2px;color:#fff}.side small{margin:0 8px;color:#9fb0c8;display:block;margin-bottom:16px}
+.side button{display:block;width:100%;text-align:left;border:0;background:none;color:inherit;padding:11px 12px;border-radius:8px;cursor:pointer;font:inherit;margin:2px 0}
+.side button.on,.side button:hover{background:#34527b;color:#fff}
+main{margin-left:240px;padding:22px 28px 50px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:18px}.top h1{font-size:22px;margin:0}
+.pn{background:var(--card);border:1px solid var(--ln);border-radius:12px;padding:18px;margin-bottom:16px}.pn h2{font-size:16px;margin:0 0 4px}.sub{color:var(--mut);font-size:12px;margin:0 0 14px}
+.g{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.full{grid-column:1/-1}
+.f{display:flex;flex-direction:column;gap:5px}label{font-size:12px;font-weight:600;color:var(--mut)}
+input,select,textarea{width:100%;padding:9px 10px;border:1px solid var(--ln);border-radius:7px;background:var(--in);color:var(--tx);font:inherit}
+input[type=checkbox]{width:auto}input[readonly]{opacity:.75}textarea{min-height:64px}
+.st{font-weight:700;color:var(--ac);border-bottom:1px solid var(--ln);padding-bottom:6px;margin:20px 0 12px;grid-column:1/-1}
+.b{border:0;border-radius:7px;padding:9px 14px;cursor:pointer;font:inherit;font-weight:600;font-size:13px;background:var(--ac);color:#fff}.b.s{background:var(--hd);color:var(--tx);border:1px solid var(--ln)}.b.d{background:#fee2e2;color:#991b1b}.b.sm{padding:5px 9px;font-size:12px}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.tw{overflow:auto}table{border-collapse:collapse;width:100%;font-size:12px}th,td{text-align:left;padding:8px;border-bottom:1px solid var(--ln);vertical-align:middle}th{background:var(--hd);color:var(--mut);white-space:nowrap}
+.pill{display:inline-block;padding:3px 8px;border-radius:20px;background:var(--hd);border:1px solid var(--ln);font-size:11px;font-weight:700}.pill.ok{color:#16a34a}.pill.w{color:#d97706}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}.cd{background:var(--card);border:1px solid var(--ln);border-radius:10px;padding:14px}.cd small{color:var(--mut)}.cd b{display:block;font-size:24px}
+.mut{color:var(--mut);font-size:12px}.ck{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:6px 0;border-bottom:1px dashed var(--ln)}.ck input[type=datetime-local],.ck input[type=text]{width:auto;flex:1 1 150px}
+.hl{background:#fff4cc;color:#3b2a00;border:2px solid #f59e0b;border-radius:10px;padding:10px}.hl label{color:inherit;font-weight:700}
+@media (prefers-color-scheme:dark){.hl{background:#3b3112;color:#fde9a8}}
+#toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--tx);color:var(--bg);padding:8px 14px;border-radius:8px;display:none;z-index:99}
+@media(max-width:800px){.side{position:static;width:100%;height:auto}main{margin:0;padding:16px 12px}.g,.g3{grid-template-columns:1fr}.cards{grid-template-columns:repeat(2,1fr)}}
+</style></head><body>
+<div id="login"><div class="lc"><div class="mut">May Harvest Corporation</div><h2 style="margin:4px 0 14px">Employee Management System</h2>
+<form onsubmit="event.preventDefault();login()">
+  <div class="f">
+    <label>User ID *</label>
+    <input id="lu" autocomplete="username" placeholder="e.g. admin, hr1, om, prod, dco, wb..." required>
+  </div>
+  <div class="f" style="margin-top:10px">
+    <label>Password *</label>
+    <div style="position:relative; display:flex; align-items:center;">
+      <input id="lp" type="password" autocomplete="current-password" placeholder="Enter password" style="padding-right:42px;" required>
+      <button type="button" id="lpToggle" style="position:absolute; right:8px; background:none; border:none; cursor:pointer; font-size:1.1rem; color:var(--mut); padding:2px;" title="Show password">👁️</button>
+    </div>
+  </div>
+  <div class="f" id="lc" hidden style="margin-top:10px">
+    <label>Confirm new password (type the same password again)</label>
+    <div style="position:relative; display:flex; align-items:center;">
+      <input id="lc2" type="password" placeholder="Confirm password" style="padding-right:42px;">
+      <button type="button" id="lc2Toggle" style="position:absolute; right:8px; background:none; border:none; cursor:pointer; font-size:1.1rem; color:var(--mut); padding:2px;" title="Show password">👁️</button>
+    </div>
+  </div>
+
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:8px;">
+    <label style="font-size:12px; display:flex; align-items:center; gap:6px; cursor:pointer; color:var(--mut);">
+      <input type="checkbox" id="lrem" checked> Remember password on this device
+    </label>
+    <button type="button" id="lforget" style="background:none; border:none; color:var(--mut); font-size:11px; cursor:pointer; padding:0; display:none;">Forget saved</button>
+  </div>
+
+  <div id="le" style="color:#dc2626;min-height:20px;margin:8px 0;font-size:12px"></div>
+  <button class="b" style="width:100%; padding:10px;">Log in</button>
+</form>
+
+<div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--ln);">
+  <div style="font-size:11px; font-weight:700; color:var(--mut); text-transform:uppercase; margin-bottom:6px;">Quick Account Select:</div>
+  <div style="display:flex; flex-wrap:wrap; gap:4px;" id="quickAccs">
+    <button type="button" class="b s sm" data-u="admin" data-p="admin123">👑 admin</button>
+    <button type="button" class="b s sm" data-u="hr1" data-p="hr123">👥 hr1</button>
+    <button type="button" class="b s sm" data-u="om" data-p="ops123">⚙️ om</button>
+    <button type="button" class="b s sm" data-u="prod" data-p="dept123">🏭 prod</button>
+    <button type="button" class="b s sm" data-u="wh" data-p="dept123">📦 wh</button>
+    <button type="button" class="b s sm" data-u="dco" data-p="doc123">📋 dco</button>
+    <button type="button" class="b s sm" data-u="wb" data-p="agency123">🏢 wb (Agency)</button>
+  </div>
+</div>
+</div></div>
+<div id="app" hidden><aside class="side"><h2>EMPLOYEE MANAGEMENT</h2><small id="who"></small><nav id="nav"></nav><button onclick="logout()" style="display:block;margin-top:16px;background:#ffffff18;padding:8px 12px;border-radius:8px;border:1px solid #ffffff30;color:#fff;cursor:pointer;width:100%;font-weight:600;font-size:12px;text-align:center;">🚪 Log out / Switch User</button></aside>
+<main><div class="top"><h1 id="pt"></h1><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="b s" onclick="exportCSV()">Export records</button><button class="b" id="nb" onclick="newRec()">+ New record</button></div></div><div id="content"></div></main></div>
+<div id="toast"></div>
+<script>
+const $=id=>document.getElementById(id),esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const KEY='ems_v2';let db=null;try{db=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+db=db||{};db.emp=db.emp||[];db.items=db.items||[];db.pw=db.pw||{};db.dc=db.dc||{};db.dcl=db.dcl||[];
+const sv=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}};
+const AG=['Workbridge Corporation','Multicareer Manpower Services','Top Jinzai Company, Inc.','BLGM Manpower Services','Omnichron Security Agency, Inc'],AGM=AG.slice(0,3);
+const DEPTS=['Basic','Further','Blast','CCM','Warehouse','E&M','Quality','Scaler','Dry warehouse','PFRP','24 Chicken','Utility','Canteen','Admin','Security','Production'];
+const PROV=['Abra','Agusan del Norte','Agusan del Sur','Aklan','Albay','Antique','Apayao','Aurora','Basilan','Bataan','Batanes','Batangas','Benguet','Biliran','Bohol','Bukidnon','Bulacan','Cagayan','Camarines Norte','Camarines Sur','Camiguin','Capiz','Catanduanes','Cavite','Cebu','Cotabato','Davao de Oro','Davao del Norte','Davao del Sur','Davao Occidental','Davao Oriental','Dinagat Islands','Eastern Samar','Guimaras','Ifugao','Ilocos Norte','Ilocos Sur','Iloilo','Isabela','Kalinga','La Union','Laguna','Lanao del Norte','Lanao del Sur','Leyte','Maguindanao del Norte','Maguindanao del Sur','Marinduque','Masbate','Metro Manila (NCR)','Misamis Occidental','Misamis Oriental','Mountain Province','Negros Occidental','Negros Oriental','Northern Samar','Nueva Ecija','Nueva Vizcaya','Occidental Mindoro','Oriental Mindoro','Palawan','Pampanga','Pangasinan','Quezon','Quirino','Rizal','Romblon','Samar','Sarangani','Siquijor','Sorsogon','South Cotabato','Southern Leyte','Sultan Kudarat','Sulu','Surigao del Norte','Surigao del Sur','Tarlac','Tawi-Tawi','Zambales','Zamboanga del Norte','Zamboanga del Sur','Zamboanga Sibugay'];
+const HT=['Newly Hired','Re-hire','Existing Employee'],REQ=['Resume','Valid ID','ID Picture','Health Card','SSS','PAG-IBIG','PhilHealth','PhilHealth YAKAP'];
+const ORI=['Food Safety Orientation','GMP and Personal Hygiene','Occupational Safety','Company Policies','Food Defense','Food Fraud','Food Safety Culture','Animal Health and Welfare','HACCP'];
+const ITEMS=['Vehicle Pass/Sticker','Freezer Jacket','Freezer Pants','Thermometer','Tablet (Gadget)','Stopwatch','Company ID','Cellphone','Others'],CON=['New','Good','Fair','Damaged','Not Applicable'];
+const SIG=[['MHC - Human Resource','hr'],['MHC - Accounting','hr'],['MHC - Department Head','depthead'],['MHC - Operations Manager','om'],['Agency - Industrial Coordinator','agency'],['Agency - Accounting','agency'],['Agency - Human Resource','agency']];
+const ROLES={admin:'Admin',hr:'HR',agency:'Agency',depthead:'Department Head',om:'Operations Manager',dco:'Document Control Officer'};
+const PERM={admin:'AKBCDEFGHIJ',hr:'AKBCDEFGJ',agency:'AKBCDEF',depthead:'AKBCDEFJ',om:'AKBCDEFJ',dco:'I'};
+const TT={A:'Personal Information',B:'Deployment Information',C:'Accountable Items',D:'Clearance Process',E:'Dashboard',F:'Masterlist',G:'Bulk Upload',H:'Accounts',I:'Document Control',J:'Other Sources',K:'Character Reference & Background Check'};
+const DOCS=[['ems','Employee Management System'],['pif','Personal Information Form'],['dep','Deployment Information'],['itm','Accountable Items Issuance'],['clr','Clearance Form']];
+if(!db.acc)db.acc=[['admin','Admin Head','admin'],['hr1','HR 1','hr'],['hr2','HR 2','hr'],['dco','Document Control Officer','dco'],['om','Operations Manager','om'],['prod','Production Head','depthead'],['wh','Warehouse Head','depthead'],['qa','Quality Head','depthead'],['eng','Engineering Head','depthead']].map(a=>({id:a[0],name:a[1],role:a[2],dept:''})).concat([['wb',0],['multi',1],['tj',2],['blgm',3],['omni',4]].map(a=>({id:a[0],name:AG[a[1]],role:'agency',agency:AG[a[1]]})));
+[['blgm','BLGM Manpower Services'],['omni','Omnichron Security Agency, Inc']].forEach(a=>{if(!db.acc.some(x=>x.id===a[0]))db.acc.push({id:a[0],name:a[1],role:'agency',agency:a[1]})});sv();
+db.emp.forEach(x=>['department','onboardDepartment'].forEach(k=>{if(x[k]==='PLI')x[k]='Quality'}));db.acc.forEach(a=>{if(a.dept==='PLI')a.dept='Quality'});[db.req,db.reqO].forEach(o=>{if(o&&o.PLI!==undefined){o.Quality=o.PLI;delete o.PLI}});if(db.man2&&db.man2.PLI){db.man2.Quality=db.man2.PLI;delete db.man2.PLI}sv();
+async function hp(id,pw){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('ems:'+id+':'+pw));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){return btoa(unescape(encodeURIComponent('ems:'+id+':'+pw)))}}
+const toast=t=>{const e=$('toast');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2600)};
+const nowL=()=>{const d=new Date();d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16)};
+const ft=i=>i?new Date(i).toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'short'}):'';
+const idgen=()=>'EMP-'+new Date().getFullYear()+'-'+Math.random().toString(36).slice(2,7).toUpperCase();
+const newEmp=()=>({id:String(Date.now())+Math.random().toString(36).slice(2,5),tracking:idgen(),createdAt:new Date().toISOString()});
+let user=null,page='A',cur=newEmp(),mAg='',mTab='All',mQ='';
+async function login(){const id=$('lu').value.trim().toLowerCase(),p=$('lp').value,a=db.acc.find(x=>x.id.toLowerCase()===id);
+ if(!a){$('le').textContent='Unknown ID.';return}
+ if(!db.pw[a.id]){if(a.id!=='admin'){$('le').textContent='No password set yet. Ask the Admin.';return}
+  $('lc').hidden=false;if(p.length<6||p!==$('lc2').value){$('le').textContent='Create a password (6+ characters) and confirm it below.';return}db.pw[a.id]=await hp(a.id,p);sv()}
+ else if(db.pw[a.id]!==await hp(a.id,p)){$('le').textContent='Incorrect password.';return}
+ 
+  const rem = $('lrem') && $('lrem').checked;
+  saveUserPassword(id, p, rem);
+  user=a;$('le').textContent='';$('lp').value='';$('login').hidden=true;$('app').hidden=false;$('who').textContent=a.name+' ('+ROLES[a.role]+')';
+ $('nav').innerHTML=[...PERM[a.role]].map(k=>`<button data-p="${k}" onclick="setPage('${k}')">${TT[k]}</button>`).join('');cur=newEmp();setPage(PERM[a.role][a.role==='depthead'||a.role==='om'?0:0])}
+function logout(){user=null;$('app').hidden=true;$('login').hidden=false}
+function setPage(p){if(!PERM[user.role].includes(p))return;page=p;document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));render()}
+function render(){$('pt').textContent=TT[page];({A:rA,K:rK,B:rB,C:rC,D:rD,E:rE,F:rF,G:rG,H:rH,I:rI,J:rJ})[page]();loadV();$('nb').hidden=RO();if(RO()&&'ABK'.includes(page)){
+  K().forEach(e=>{
+    if(page==='B'){
+      if(e.dataset.k==='dhApproval') e.disabled=false;
+      else if(user.role==='depthead' && e.dataset.k==='approvalRemarks') e.disabled=false;
+      else e.disabled=true;
+    } else {
+      e.disabled=true;
+    }
+  });
+  document.querySelectorAll('.sv').forEach(b=>b.hidden=true);
+}}
+const vis=()=>{const e=db.emp;if(user.role==='agency')return e.filter(x=>x.agency===user.agency);if(user.role==='depthead')return e.filter(x=>user.dept&&(x.department||x.onboardDepartment)===user.dept);return e};
+const fn=x=>(x.surname?x.surname+(x.firstName?', ':''):'')+[x.firstName,x.middleName].filter(Boolean).join(' ')||'(no name)';
+const K=()=>[...document.querySelectorAll('#content [data-k]')];
+const collect=()=>{const o={};K().forEach(e=>o[e.dataset.k]=e.type==='checkbox'?e.checked:e.value.trim());return o};
+const loadV=()=>{setTimeout(addrInit,0);K().forEach(e=>{const v=cur[e.dataset.k];if(e.type==='checkbox')e.checked=!!v;else{if(e.tagName==='SELECT'&&v&&![...e.options].some(o=>o.value===v||o.text===v))e.add(new Option(v,v));e.value=v==null?'':v}});if(user&&user.role==='agency'){const a=document.querySelector('[data-k=agency]');if(a){a.value=user.agency;a.disabled=true}}};
+function upsert(){const o0=db.emp.find(x=>x.id===cur.id)||{};Object.assign(cur,collect());logH(o0,cur);if(user.role==='agency')cur.agency=user.agency;cur.updatedBy=user.name;cur.updatedById=user.id;cur.updatedAt=new Date().toISOString();const i=db.emp.findIndex(x=>x.id===cur.id);if(i<0){cur.createdById=user.id;cur.createdBy=user.name;db.emp.push(cur)}else db.emp[i]=cur;sv();cur=JSON.parse(JSON.stringify(cur))}
+const F=(l,k,o,t,full,x)=>`<div class="f${full?' full':''}"><label>${l}</label>${o?`<select data-k="${k}"><option value="">Select</option>${o.map(v=>`<option>${esc(v)}</option>`).join('')}</select>`:`<input data-k="${k}" type="${t||'text'}" ${x||''}>`}</div>`;
+const FT=(l,k,o,h)=>`<div class="f${h?' hl':''}"><label>${l}</label><select data-k="${k}" data-dt="${k}_dt"><option value="">Select</option>${o.map(v=>`<option>${esc(v)}</option>`).join('')}</select><input data-k="${k}_dt" type="datetime-local" readonly title="Auto date/time"></div>`;
+const T=t=>`<div class="st">${t}</div>`;
+const dcl=k=>{const c=db.dc[k]||{};return`<p class="mut">Doc. Code: <b>${esc(c.code||'-')}</b> &middot; Rev. No.: <b>${esc(c.rev||'-')}</b> &middot; Effectivity: <b>${esc(c.eff||'-')}</b></p>`};
+const pick=()=>`<div class="f" style="margin-bottom:12px"><label>Select employee record</label><select onchange="pickE(this.value)"><option value="">+ New record</option>${vis().map(z=>`<option value="${z.id}"${z.id===cur.id?' selected':''}>${esc(z.tracking)} - ${esc(fn(z))}</option>`).join('')}</select></div>`;
+function pickE(id){cur=id?JSON.parse(JSON.stringify(db.emp.find(x=>x.id===id))):newEmp();render()}
+function newRec(){cur=newEmp();setPage('A')}
+const rows=(n,p,cols)=>Array.from({length:n},(_,i)=>cols.map(c=>`<div class="f"><label>${c[0]} ${n>1?i+1:''}</label><input data-k="${p}${i}${c[1]}" type="${c[2]||'text'}"></div>`).join('')).join('');
+const addr=(p,l)=>T(l)+F('Province',p+'Province',PROV)+F('Town / City',p+'City',[])+F('Barangay',p+'Barangay',[])+F('House Number & Street',p+'Street');
+
+/* ---- Address dropdowns: Province -> Town/City -> Barangay (PSGC open data) ---- */
+const PSGC='https://psgc.gitlab.io/api',NCR_CODE='130000000',_pc={};
+const pj=u=>_pc[u]||(_pc[u]=fetch(PSGC+u).then(r=>{if(!r.ok)throw 0;return r.json()}).catch(e=>{delete _pc[u];throw e}));
+const nm=x=>String(x||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+const gv=k=>{const e=document.querySelector('#content [data-k='+k+']');return e?e.value:''};
+async function provCode(name){if(nm(name).startsWith('metromanila'))return{ncr:1};const l=await pj('/provinces.json');const n=nm(name);const f=l.find(x=>nm(x.name)===n)||l.find(x=>nm(x.name).includes(n)||n.includes(nm(x.name)));if(!f)throw 0;return{code:f.code}}
+async function towns(prov){const c=await provCode(prov);const l=await pj(c.ncr?'/regions/'+NCR_CODE+'/cities-municipalities.json':'/provinces/'+c.code+'/cities-municipalities.json');return l.map(x=>({code:x.code,name:x.name})).sort((a,b)=>a.name.localeCompare(b.name))}
+async function brgys(prov,town){const l=await towns(prov);const t=l.find(x=>nm(x.name)===nm(town));if(!t)throw 0;const b=await pj('/cities-municipalities/'+t.code+'/barangays.json');return b.map(x=>x.name).sort((a,b)=>a.localeCompare(b))}
+function setOpts(k,list,val,ph){let e=document.querySelector('#content [data-k='+k+']');if(!e)return;if(e.tagName!=='SELECT'){const s=document.createElement('select');s.dataset.k=k;e.replaceWith(s);e=s}
+ const L=list.slice();if(val&&!L.includes(val))L.push(val);e.innerHTML='<option value="">'+ph+'</option>'+L.map(v=>'<option>'+esc(v)+'</option>').join('');e.value=val||'';e.disabled=RO()}
+function toText(k,val){const e=document.querySelector('#content [data-k='+k+']');if(!e||e.tagName==='INPUT')return;const i=document.createElement('input');i.type='text';i.dataset.k=k;i.value=val||'';i.placeholder='Type here (list unavailable offline)';e.replaceWith(i)}
+async function fillAddr(p,v){const C=p+'City',B=p+'Barangay';
+ if(!v.prov){setOpts(C,[],'','Select province first');setOpts(B,[],'','Select town first');return}
+ let tl=null;
+ if(!v.skipTown){setOpts(C,[],v.city,'Loading...');setOpts(B,[],v.brgy,'Select town first');
+  try{tl=(await towns(v.prov)).map(x=>x.name)}catch(e){toText(C,v.city);toText(B,v.brgy);return}
+  if(gv(p+'Province')!==v.prov)return;
+  const hit=tl.find(x=>nm(x)===nm(v.city));if(hit)v.city=hit;setOpts(C,tl,v.city,'Select');}
+ if(!v.city){setOpts(B,[],'','Select town first');return}
+ setOpts(B,[],v.brgy,'Loading...');
+ try{const bl=await brgys(v.prov,v.city);if(gv(C)!==v.city)return;setOpts(B,bl,v.brgy,'Select')}catch(e){toText(B,v.brgy)}}
+function addrInit(){['cur','per'].forEach(p=>{if(document.querySelector('#content [data-k='+p+'Province]'))fillAddr(p,{prov:cur[p+'Province']||'',city:cur[p+'City']||'',brgy:cur[p+'Barangay']||''})})}
+function copyAddr(){const g=s=>gv('cur'+s);const pr=document.querySelector('#content [data-k=perProvince]'),st=document.querySelector('#content [data-k=perStreet]');if(pr)pr.value=g('Province');if(st)st.value=g('Street');fillAddr('per',{prov:g('Province'),city:g('City'),brgy:g('Barangay')})}
+function rA(){const kids=Math.min(15,+cur.ch_n||0);$('content').innerHTML=`<div class="pn"><h2>Personal Information Form</h2>${dcl('pif')}<p class="sub">Create a new record or select an existing one.</p>${pick()}<div class="g">
+${F('Hiring type','hireType',HT)}${F('Application type','applicationType',['Walk-in','Referral','From Agency','From EMHCO'])}${F('Referring employee name','referralName')}${F('Employee number','tracking',null,'text',0,'readonly')}
+${T('Personal Information')}${F('Surname','surname')}${F('First name','firstName')}${F('Middle name','middleName')}${F('Birthday','birthday','','date')}${F('Gender','gender',['Male','Female','Prefer not to say'])}${F('Civil status','civilStatus',['Single','Married','Widowed','Separated'])}
+${addr('cur','Current Address')}${T('Permanent Address')}${F('Same as current?','same',['Same as Current Address','No'])}${F('Province','perProvince',PROV)}${F('Town / City','perCity',[])}${F('Barangay','perBarangay',[])}${F('House Number & Street','perStreet')}
+${T('Family Information')}${F("Mother's maiden name",'motherName')}${F("Mother's age",'motherAge','','number')}${F("Father's name",'fatherName')}${F("Father's age",'fatherAge','','number')}${F('Spouse name','spouseName')}${F('Spouse age','spouseAge','','number')}
+${F('Number of children','ch_n',Array.from({length:16},(_,i)=>String(i)))}<div></div>${rows(kids,'ch',[['Child name','n'],['Age','a','number']])}
+${T('Educational Attainment')}<div class="full">${[['cg','College Graduate'],['cl','College Level'],['hg','High School Graduate'],['ot','Others']].map(e=>`<label class="ck"><input type="checkbox" data-k="edu_${e[0]}"> ${e[1]}</label>`).join('')}</div>${F('Others (specify)','eduOther')}${F('Degree program','degree')}${F('Year graduated','yearGrad','','number')}
+${T('Previous Employment')}${rows(3,'pe',[['Company','c'],['Employment period','p']])}
+</div>
+<div class="acts"><button class="b sv" onclick="saveForm()">Save personal information</button><button class="b s" onclick="if(user.role!=='depthead')saveForm();setPage('K')">Next: Character reference &amp; background check</button></div></div>`}
+function saveForm(){upsert();toast('Saved');if(page==='A'||page==='K')cur=JSON.parse(JSON.stringify(cur))}
+const crCount=()=>{let m=Math.max(1,+cur.cr_n||0);for(let i=0;i<10;i++)if(['n','c','p','t','r'].some(f=>cur['cr'+i+f]))m=Math.max(m,i+1);return Math.min(10,m)};
+const crNames=()=>{const o=[];for(let i=0;i<crCount();i++){const v=(cur['cr'+i+'n']||'').trim();if(v&&!o.includes(v))o.push(v)}return o};
+function addRef(){Object.assign(cur,collect());if(crCount()>=10){toast('Maximum of 10 references');return}cur.cr_n=crCount()+1;render()}
+function refBg(){const e=document.querySelector('#content [data-k=bgRef]');if(!e)return;const v=e.value,N=[...document.querySelectorAll('#content [data-k]')].filter(x=>/^cr\d+n$/.test(x.dataset.k)).map(x=>x.value.trim()).filter((x,i,a)=>x&&a.indexOf(x)===i);if(v&&!N.includes(v))N.push(v);e.innerHTML='<option value="">Select reference person</option>'+N.map(x=>'<option>'+esc(x)+'</option>').join('');e.value=v}
+document.addEventListener('change',e=>{if(e.target.dataset&&/^cr\d+n$/.test(e.target.dataset.k))refBg()});
+function rK(){const n=crCount();let refs='';for(let i=0;i<n;i++)refs+=`<div class="st" style="font-size:13px">Reference ${i+1}</div>`+F('Name','cr'+i+'n')+F('Company','cr'+i+'c')+F('Position','cr'+i+'p')+F('Contact number','cr'+i+'t')+F('Relation to the applicant','cr'+i+'r');
+$('content').innerHTML=`<div class="pn"><h2>Character Reference &amp; Background Checking</h2><p class="sub">Select the employee record, then record the character references and the background check result.</p>${pick()}<div class="g">
+${F('Employee number','tracking',null,'text',0,'readonly')}${F('Employee name','_nm',null,'text',0,'readonly disabled')}
+${T('Character References')}${refs}</div>
+<div class="acts"><button class="b s sv" onclick="addRef()">+ Add reference</button></div>
+<div class="g">${T('Background Checking')}${F('Reference person checked','bgRef',crNames())}${FT('Background check status','bgStatus',['Pending','Ongoing','Cleared','With Findings'])}${F('Remarks','bgRemarks')}</div>
+<div class="acts"><button class="b s" onclick="if(user.role!=='depthead')saveForm();setPage('A')">Back: Personal information</button><button class="b sv" onclick="saveForm()">Save</button><button class="b s" onclick="if(user.role!=='depthead')saveForm();setPage('B')">Next: Deployment information</button></div></div>`;const m=document.querySelector('[data-k=_nm]');if(m)m.removeAttribute('data-k'),m.value=fn(cur)}
+function rB(){$('content').innerHTML=`<div class="pn"><h2>Deployment &amp; Employment Processing</h2>${dcl('dep')}${pick()}<div class="g">
+${F('Employee number','tracking',null,'text',0,'readonly')}${F('Agency name','agency',AG)}${F("Agency coordinator's name",'coordinator')}${F('Deployment date','deploymentDate','','date')}${F('Department / assigned area','department',DEPTS)}${F('Position desired','position')}
+${T('Application &amp; Approval (date/time is recorded automatically at each step)')}${F('Application date','applicationDate','','date')}${FT('Application status','applicationStatus',['For Screening','For Interview','For Medical','For HR Approval','For Department Head Approval','Approved','Disapproved','No Show','Cancelled'])}${FT('Initial screening','screening',['Pending','Passed','Failed'])}${FT('Interview results','interview',['Pending','Passed','Failed'])}${FT('Medical examination','medical',['Pending','Fit to Work','Unfit','Not Applicable'])}${FT('HR approval','hrApproval',['Pending','Approved','Disapproved'])}${FT("Department head's approval (Department Heads: update this field)",'dhApproval',['Pending','Approved','Disapproved'],1)}${F('Position granted','grantedPosition')}<div class="f full"><label>Approval remarks</label><textarea data-k="approvalRemarks"></textarea></div>
+${T('Requirements Compliance (date is recorded when ticked)')}<div class="full">${REQ.map((n,i)=>`<div class="ck"><label style="flex:1 1 180px"><input type="checkbox" data-k="r${i}" data-dt="r${i}_dt"> ${n}</label><input data-k="r${i}_dt" type="datetime-local" readonly></div>`).join('')}</div>
+${F('Verification status','verification',['Pending','Verified','With Pending Requirements'])}${F('Requirement expiration date','expirationDate','','date')}<div class="f full"><label>Pending requirements</label><textarea data-k="pendingRequirements"></textarea></div>
+${T('Orientation (tick, then set date/time and trainer)')}<div class="full">${ORI.map((n,i)=>`<div class="ck"><label style="flex:1 1 200px"><input type="checkbox" data-k="o${i}" data-dt="o${i}_dt"> ${n}</label><input data-k="o${i}_dt" type="datetime-local"><input data-k="o${i}_by" type="text" placeholder="Conducted by"></div>`).join('')}</div>${F('Attendance','attendance',['Pending','Present','Absent'])}${F('Orientation completion','orientationCompletion',['Pending','Completed'])}
+${T('Onboarding &amp; Active Employment')}${F('Department / section','onboardDepartment',DEPTS)}${F('Position','onboardPosition')}${F('Assigned team leader','teamLeader')}${F('Start date','startDate','','date')}${F('Agency deployment confirmation','deploymentConfirmation',['Pending','Confirmed'])}${F('Employment status','employmentStatus',['Applicant','For Onboarding','Active','Separated'])}
+${T('Separation')}${F('Separation date','separationDate','','date')}${F('Reason for separation','separationReason',['Resignation','Termination','End of Contract','AWOL','Transferred to Other Company','Others'])}<div class="f full"><label>Separation remarks</label><textarea data-k="separationRemarks"></textarea></div></div>
+<div class="acts"><button class="b sv" onclick="upsert();toast('Saved')">Save deployment record</button>${RO()?`<button class="b" onclick="saveDH()">Save department head's approval</button>`:''}${PERM[user.role].includes('A')?`<button class="b s" onclick="setPage('A')">Personal information</button>`:''}</div></div>${tbl()}`}
+function tbl(){const v=vis();return`<div class="pn"><h2>Records</h2><div class="tw"><table><tr><th>Employee No.</th><th>Name</th><th>Agency</th><th>Type</th><th>Status</th><th></th></tr>${v.map(x=>`<tr><td>${esc(x.tracking)}</td><td>${esc(fn(x))}</td><td>${esc(x.agency)}</td><td>${esc(x.hireType)}</td><td><span class="pill">${esc(x.employmentStatus||x.applicationStatus||'Applicant')}</span></td><td><button class="b sm s" onclick="pickE('${x.id}')">${RO()?'View':'Edit'}</button> <button class="b sm d sv" onclick="delE('${x.id}')">Delete</button></td></tr>`).join('')||'<tr><td colspan=6 class="mut">No records.</td></tr>'}</table></div></div>`}
+function delE(id){if(!confirm('Delete this record?'))return;db.emp=db.emp.filter(x=>x.id!==id);sv();if(cur.id===id)cur=newEmp();render()}
+function rC(){const v=vis();$('content').innerHTML=`<div class="pn"><h2>Issuance of Accountable Items</h2>${dcl('itm')}<div class="g">
+<div class="f"><label>Employee</label><select id="ie"><option value="">Select</option>${v.map(x=>`<option value="${x.id}">${esc(x.tracking)} - ${esc(fn(x))}</option>`).join('')}</select></div><div class="f"><label>Issuance date</label><input id="id" type="date" value="${nowL().slice(0,10)}"></div>
+<div class="f"><label>Item</label><select id="in">${ITEMS.map(i=>`<option>${i}</option>`).join('')}</select></div><div class="f"><label>Other item (if Others)</label><input id="io"></div><div class="f"><label>Quantity</label><input id="iq" type="number" min="1" value="1"></div><div class="f"><label>Condition</label><select id="ic">${CON.map(i=>`<option>${i}</option>`).join('')}</select></div></div>
+<div class="acts"><button class="b" onclick="addItem()">Save issuance</button></div></div><div class="pn"><h2>Issuance records</h2><div class="tw"><table><tr><th>Employee</th><th>Date</th><th>Item</th><th>Qty</th><th>Condition</th><th>Issued by</th></tr>${db.items.filter(i=>v.some(x=>x.id===i.eid)).map(i=>`<tr><td>${esc(i.emp)}</td><td>${esc(i.date)}</td><td>${esc(i.item)}</td><td>${esc(i.qty)}</td><td>${esc(i.cond)}</td><td>${esc(i.by)}</td></tr>`).join('')||'<tr><td colspan=6 class="mut">None yet.</td></tr>'}</table></div></div>`}
+function addItem(){const e=db.emp.find(x=>x.id===$('ie').value);if(!e){toast('Select an employee');return}const n=$('in').value;db.items.push({eid:e.id,emp:e.tracking+' - '+fn(e),date:$('id').value,item:n==='Others'?$('io').value:n,qty:$('iq').value,cond:$('ic').value,by:user.name});sv();toast('Saved');rC()}
+function rD(){const ex=db.emp.some(x=>x.id===cur.id),ok=ex?'':'<p class="mut">Select an employee to start.</p>';
+$('content').innerHTML=`<div class="pn"><h2>Employee Clearance Process</h2>${dcl('clr')}${pick()}${ok}<div class="g">${F('Clearance application date','clearDate','','date')}${F('Area of assignment','clearArea')}${F('Date hired','dateHired','','date')}${F('Last date of duty','lastDuty','','date')}${F('Reason for separation','clearReason',['AWOL','Resigned','Transferred to Other Company','End of Contract','Others'])}${F('Other reason / remarks','clearOther')}</div>
+<div class="st" style="margin-top:18px">Returned Accountable Items</div><div class="tw"><table><tr><th>Item</th><th>Returned qty</th><th>Condition</th></tr>${ITEMS.map((n,i)=>`<tr><td><label><input type="checkbox" data-k="ri${i}"> ${n}</label></td><td><input data-k="rq${i}" type="number" min="0" style="max-width:90px"></td><td><select data-k="rc${i}"><option value="">Select</option>${CON.map(c=>`<option>${c}</option>`).join('')}</select></td></tr>`).join('')}</table></div>
+<div class="g" style="margin-top:12px">${F('Items received by','recBy')}<div class="f"><label>Signature</label>${sg('rec')}</div></div>
+<div class="st" style="margin-top:18px">Signatory Clearance (date/time recorded when signed)</div><div class="tw"><table><tr><th>Signatory</th><th>Status</th><th>Remarks</th><th>Signature</th></tr>${SIG.map((s,i)=>`<tr><td>${s[0]}</td><td><select data-k="s${i}"><option value="">Select</option><option>Cleared</option><option>With Pending Accountability</option><option>Not Applicable</option></select></td><td><input data-k="sr${i}"></td><td>${sg('s'+i,s[1])}</td></tr>`).join('')}</table></div>
+<div class="acts"><button class="b" onclick="saveClr()">Save clearance</button></div></div>`}
+function sg(k,role){const by=cur[k+'_by'];if(by)return`<span class="pill ok">Signed: ${esc(by)}<br>${esc(ft(cur[k+'_at']))}</span>`;const can=!role||user.role==='admin'||user.role===role;return`<button class="b sm" ${can?'':'disabled title="Not your signatory role"'} onclick="signIt('${k}')">Sign</button>`}
+function signIt(k){if(!db.emp.some(x=>x.id===cur.id)){toast('Select an employee first');return}Object.assign(cur,collect());cur[k+'_by']=user.name;cur[k+'_at']=new Date().toISOString();upsert();toast('Signed');rD();loadV()}
+function saveClr(){if(!db.emp.some(x=>x.id===cur.id)){toast('Select an employee first');return}Object.assign(cur,collect());const s=SIG.map((_,i)=>cur['s'+i]);cur.clearanceStatus=s.every(x=>x==='Cleared'||x==='Not Applicable')?'Cleared':s.some(x=>x==='With Pending Accountability')?'With Pending Accountability':'In Progress';if(cur.lastDuty){cur.separationDate=cur.lastDuty;cur.employmentStatus='Separated'}upsert();toast('Clearance saved: '+cur.clearanceStatus)}
+const MAN=['Basic','Further','Blast','CCM','Warehouse','Quality','Scaler','Dry warehouse','E&M','PFRP','24 Chicken','Utility'];
+const dsrc=()=>user.role==='agency'?vis():db.emp,canReq=()=>user.role==='admin'||user.role==='hr';
+const pt=(t,r)=>r?(t/r*100).toFixed(1)+'%':'',pc=(t,r)=>r?`<b style="color:${t>=r?'#16a34a':'#d97706'}">${pt(t,r)}</b>`:'-';
+function manData(){db.req=db.req||{};const cols=user.role==='agency'?[user.agency]:AGM,src=dsrc().filter(x=>x.employmentStatus==='Active'),rows=MAN.map(d=>{const cs=cols.map(a=>src.filter(x=>x.agency===a&&(x.onboardDepartment||x.department)===d).length);return{d,r:+db.req[d]||0,cs,t:cs.reduce((p,q)=>p+q,0)}}),tot={r:rows.reduce((p,x)=>p+x.r,0),cs:cols.map((_,i)=>rows.reduce((p,x)=>p+x.cs[i],0))};tot.t=tot.cs.reduce((p,q)=>p+q,0);return{cols,rows,tot}}
+function setReq(d,v){if(!canReq())return;db.req=db.req||{};db.req[d]=Math.max(0,+v||0);db.reqInfo={by:user.id,at:new Date().toISOString()};sv();rE()}
+function man(){const m=manData(),i=db.reqInfo;return`<div class="pn"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><h2>Manning per area</h2><button class="b sm s" onclick="exportMan()">Export manning</button></div><p class="sub">Req. (required manning) ${canReq()?'can be edited here (Admin and HR).':'is set by Admin and HR.'} Counts are Active employees per agency and area.${i?' Req. last updated by '+esc(i.by)+', '+esc(ft(i.at))+'.':''}</p><div class="tw"><table><tr><th>Area</th><th>Req.</th>${m.cols.map(a=>`<th>${esc(a)}</th>`).join('')}<th>Total</th><th>%</th></tr>${m.rows.map(x=>`<tr><td><b>${x.d}</b></td><td>${canReq()?`<input type="number" min="0" value="${x.r}" style="max-width:90px" onchange="setReq('${x.d}',this.value)">`:x.r}</td>${x.cs.map(v=>`<td>${v}</td>`).join('')}<td><b>${x.t}</b></td><td>${pc(x.t,x.r)}</td></tr>`).join('')}<tr style="font-weight:700"><td>Total</td><td>${m.tot.r}</td>${m.tot.cs.map(v=>`<td>${v}</td>`).join('')}<td>${m.tot.t}</td><td>${pc(m.tot.t,m.tot.r)}</td></tr></table></div></div>`}
+const OA=['Canteen','Admin','Security','Engineering','Production','Warehouse','Quality'];
+function od(){db.reqO=db.reqO||{};db.man2=db.man2||{};const A=dsrc().filter(x=>x.employmentStatus==='Active'),dp=x=>x.onboardDepartment||x.department,B=AG[3],O=AG[4],rows=OA.map(d=>{const e=A.filter(x=>x.applicationType==='From EMHCO'&&x.agency!==B&&x.agency!==O&&dp(x)===d).length,b=A.filter(x=>x.agency===B&&dp(x)===d).length,o=A.filter(x=>x.agency===O&&dp(x)===d).length;return{d,r:+db.reqO[d]||0,e,b,o,t:e+b+o}}),tot=rows.reduce((p,x)=>({r:p.r+x.r,e:p.e+x.e,b:p.b+x.b,o:p.o+x.o,t:p.t+x.t}),{r:0,e:0,b:0,o:0,t:0});return{rows,tot}}
+function setO(d,k,v){if(!canReq())return;db.reqO=db.reqO||{};db.man2=db.man2||{};v=Math.max(0,+v||0);if(k==='r')db.reqO[d]=v;else (db.man2[d]=db.man2[d]||{})[k]=v;db.reqInfo={by:user.id,at:new Date().toISOString()};sv();render()}
+function rJ(){$('content').innerHTML=oth()||'<div class="pn"><p class="mut">Not available for your account.</p></div>'}
+function oth(){if(user.role==='agency')return'';const m=od(),ip=(d,k,v)=>canReq()?`<input type="number" min="0" value="${v}" style="max-width:80px" onchange="setO('${d}','${k}',this.value)">`:v;return`<div class="pn"><h2>Other sources: From EMHCO, BLGM, Omnichron</h2><p class="sub">Shown separately from the agency manning on the Dashboard. From EMHCO counts Active employees whose Application type is From EMHCO. BLGM and Omnichron count their Active employees by agency and department automatically. Only the Req. is entered, by Admin or HR. Engineering, Production, Warehouse and Quality are listed in case EMHCO HR supplies them.</p><div class="tw"><table><tr><th>Area</th><th>Req.</th><th>From EMHCO</th><th>BLGM</th><th>Omnichron</th><th>Total</th><th>%</th></tr>${m.rows.map(x=>`<tr><td><b>${x.d}</b></td><td>${ip(x.d,'r',x.r)}</td><td>${x.e}</td><td>${x.b}</td><td>${x.o}</td><td><b>${x.t}</b></td><td>${pc(x.t,x.r)}</td></tr>`).join('')}<tr style="font-weight:700"><td>Total</td><td>${m.tot.r}</td><td>${m.tot.e}</td><td>${m.tot.b}</td><td>${m.tot.o}</td><td>${m.tot.t}</td><td>${pc(m.tot.t,m.tot.r)}</td></tr></table></div></div>`}
+function exportMan(){const m=manData(),c=db.dc.ems||{},i=db.reqInfo||{};saveFile([c.code||'NOCODE','Manning per Area',nowL().slice(0,10).replace(/-/g,'')].join('_').replace(/[^\w .\-]+/g,'')+'.csv',csv([['Document','Document Code','Revision No.','Effectivity'],['Employee Management System',c.code||'',c.rev||'',c.eff||''],['Exported by (User ID)',user.id,'Exported at',ft(new Date().toISOString())],['Req. last updated by (User ID)',i.by||'','Req. last updated at',ft(i.at)],[],['Area','Req.',...m.cols,'Total','%'],...m.rows.map(x=>[x.d,x.r,...x.cs,x.t,pt(x.t,x.r)]),['Total',m.tot.r,...m.tot.cs,m.tot.t,pt(m.tot.t,m.tot.r)],...(user.role==='agency'?[]:[[],['Other sources','Req.','From EMHCO','BLGM','Omnichron','Total','%'],...od().rows.map(x=>[x.d,x.r,x.e,x.b,x.o,x.t,pt(x.t,x.r)]),['Total',od().tot.r,od().tot.e,od().tot.b,od().tot.o,od().tot.t,pt(od().tot.t,od().tot.r)]])]))}
+const RO=()=>user.role==='depthead'||user.role==='om';
+function saveDH(){
+  const v = document.querySelector('[data-k=dhApproval]').value;
+  const remEl = document.querySelector('[data-k=approvalRemarks]');
+  const rem = remEl ? remEl.value.trim() : '';
+  const x = db.emp.find(e=>e.id===cur.id);
+  if(!x){toast('Select a saved record first');return}
+  const o={...x}, at=new Date().toISOString();
+  x.dhApproval = v;
+  x.dhApproval_dt = v ? nowL() : '';
+  if(remEl && user.role==='depthead') x.approvalRemarks = rem;
+  if(v==='Approved'||v==='Disapproved'){x.applicationStatus=v; x.approvalDate=at.slice(0,10)}
+  x.updatedBy=user.name; x.updatedById=user.id; x.updatedAt=at;
+  logH(o,x); sv(); cur=JSON.parse(JSON.stringify(x));
+  toast('Approval & remarks saved'); render();
+}
+const HF=[['applicationStatus','Application status'],['screening','Initial screening'],['interview','Interview'],['medical','Medical'],['hrApproval','HR approval'],['dhApproval','Dept Head approval']];
+function logH(o,n){HF.forEach(f=>{if((o[f[0]]||'')!==(n[f[0]]||'')){const at=new Date().toISOString();(n.hist=n.hist||[]).push({at,uid:user.id,by:user.name,f:f[1],from:o[f[0]]||'',to:n[f[0]]||''});if(f[0]==='applicationStatus')n.statusAt=at}})}
+const hs=x=>(x.hist||[]).map(h=>ft(h.at)+' - '+h.f+': '+(h.from||'(none)')+' -> '+h.to+' ('+h.uid+')').join(' | ');
+const sigs=x=>SIG.map((s,i)=>x['s'+i+'_by']?s[0]+': '+x['s'+i+'_by']+', '+ft(x['s'+i+'_at']):'').filter(Boolean).concat(x.rec_by?['Items received: '+x.rec_by+', '+ft(x.rec_at)]:[]).join(' | ');
+const nl=x=>PERM[user.role].includes('A')?`<a href="#" onclick="viewE('${x.id}');return false">${esc(fn(x))}</a>`:esc(fn(x));
+function viewE(id){cur=JSON.parse(JSON.stringify(db.emp.find(x=>x.id===id)));setPage('A')}
+function decide(id,v){const x=db.emp.find(e=>e.id===id);if(!x)return;const o={...x},at=new Date().toISOString();x.dhApproval=v;x.dhApproval_dt=nowL();x.applicationStatus=v;x.approvalDate=at.slice(0,10);x.updatedBy=user.name;x.updatedById=user.id;x.updatedAt=at;logH(o,x);sv();toast(v+' (recorded automatically)');rE()}
+function apprHtml(){if(user.role!=='depthead')return'';const l=vis().filter(x=>PEND.includes(x.applicationStatus));return`<div class="pn"><h2>Applicants for your approval</h2><p class="sub">Approve or disapprove applicants of your department. The date and time are recorded automatically.${user.dept?'':' No department is assigned to your account yet, ask the Admin.'}</p><div class="tw"><table><tr><th>Name</th><th>Agency</th><th>Position</th><th>Status</th><th>Action</th></tr>${l.map(x=>`<tr><td>${nl(x)}</td><td>${esc(x.agency)}</td><td>${esc(x.position)}</td><td>${esc(x.applicationStatus)}</td><td><button class="b sm" onclick="decide('${x.id}','Approved')">Approve</button> <button class="b sm d" onclick="decide('${x.id}','Disapproved')">Disapprove</button></td></tr>`).join('')||'<tr><td colspan=5 class="mut">No applicants waiting for approval.</td></tr>'}</table></div></div>`}
+function exportHist(){const c=db.dc.ems||{},rows=[];dsrc().forEach(x=>(x.hist||[]).forEach(h=>rows.push([x.tracking,fn(x),x.agency,x.department||x.onboardDepartment,h.f,h.from,h.to,h.uid,h.by,ft(h.at)])));saveFile([c.code||'NOCODE','Application Status History',nowL().slice(0,10).replace(/-/g,'')].join('_').replace(/[^\w .\-]+/g,'')+'.csv',csv([['Document','Document Code','Revision No.','Effectivity'],['Employee Management System',c.code||'',c.rev||'',c.eff||''],['Exported by (User ID)',user.id,'Exported at',ft(new Date().toISOString())],[],['Employee Number','Name','Agency','Department','Field','From','To','Changed By (User ID)','Changed By (Name)','Changed At'],...rows]))}
+const PEND=['For Screening','For Interview','For Medical','For HR Approval','For Department Head Approval'];
+function pendHtml(){const s=dsrc(),dp=x=>x.department||x.onboardDepartment||'(No department)',ds=[...MAN,...new Set(s.map(dp).filter(d=>!MAN.includes(d)))],n=f=>s.filter(f).length;
+const row=(l,g)=>[l,n(x=>g(x)&&PEND.includes(x.applicationStatus)),n(x=>g(x)&&x.applicationStatus==='For HR Approval'),n(x=>g(x)&&x.applicationStatus==='For Department Head Approval'),n(x=>g(x)&&x.applicationStatus==='No Show'),n(x=>g(x)&&x.applicationStatus==='Cancelled')];
+const R=ds.map(d=>row(d,x=>dp(x)===d)).filter(w=>w[1]||w[4]||w[5]),A=(user.role==='agency'?[user.agency]:AG).map(a=>row(a,x=>x.agency===a)),T=row('Total',()=>true);
+const tb=(h,r)=>`<table><tr><th>${h}</th><th>Pending approval</th><th>For HR approval</th><th>For Dept Head approval</th><th>No show</th><th>Cancelled</th></tr>${r.map(w=>`<tr${w[0]==='Total'?' style="font-weight:700"':''}><td>${esc(w[0])}</td>${w.slice(1).map(v=>`<td>${v?'<b>'+v+'</b>':v}</td>`).join('')}</tr>`).join('')}</table>`;
+return`<div class="pn"><h2>Pending approvals, no-shows and cancelled applications</h2><p class="sub">Pending approval = applicants For Screening, Interview, Medical, HR Approval or Dept Head Approval. No show and Cancelled come from the Application status in Deployment Information. Departments with no pending, no-show or cancelled applicants are not listed.</p><div class="tw">${tb('Department',R.concat([T]))}</div><div class="tw" style="margin-top:14px">${tb('Agency',A.concat([T]))}</div></div>`}
+function rE(){const a=dsrc(),c=f=>a.filter(f).length;$('content').innerHTML=`<div class="cards">${[['Total records',a.length],['Approved',c(x=>x.applicationStatus==='Approved')],['Requirements verified',c(x=>x.verification==='Verified')],['Orientation completed',c(x=>x.orientationCompletion==='Completed')],['For onboarding',c(x=>x.employmentStatus==='For Onboarding')],['Active',c(x=>x.employmentStatus==='Active')],['Separated',c(x=>x.employmentStatus==='Separated')],['Background check cleared',c(x=>x.bgStatus==='Cleared')],['Pending approval',c(x=>PEND.includes(x.applicationStatus))],['No show',c(x=>x.applicationStatus==='No Show')],['Cancelled',c(x=>x.applicationStatus==='Cancelled')]].map(z=>`<div class="cd"><small>${z[0]}</small><b>${z[1]}</b></div>`).join('')}</div>${apprHtml()}${man()}${pendHtml()}<div class="pn"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><h2>Status overview</h2><button class="b sm s" onclick="exportHist()">Export status history</button></div><div class="tw"><table><tr><th>Employee No.</th><th>Employee</th><th>Agency</th><th>Department</th><th>Application</th><th>Requirements</th><th>Background</th><th>Employment</th></tr>${a.map(x=>`<tr><td>${esc(x.tracking)}</td><td>${nl(x)}</td><td>${esc(x.agency)}</td><td>${esc(x.department||x.onboardDepartment)}</td><td>${esc(x.applicationStatus||'Pending')}<div class="mut">${esc(ft(x.statusAt))}</div></td><td>${esc(x.verification||'Pending')}</td><td>${esc(x.bgStatus||'Pending')}</td><td>${esc(x.employmentStatus||'Applicant')}</td></tr>`).join('')||'<tr><td colspan=8 class="mut">No records.</td></tr>'}</table></div></div>`}
+const mRows=()=>vis().filter(x=>(x.agency||'No Agency')===mAg).filter(x=>mTab==='All'||(mTab==='Applicants'?['Applicant','For Onboarding',undefined,''].includes(x.employmentStatus):x.employmentStatus===mTab)).filter(x=>!mQ||(fn(x)+x.tracking+(x.department||x.onboardDepartment)+x.position).toLowerCase().includes(mQ.toLowerCase())).sort((a,b)=>fn(a).localeCompare(fn(b)));
+function rF(){const names=[...AG,...new Set(vis().map(x=>x.agency).filter(n=>n&&!AG.includes(n)))];$('content').innerHTML=`<div class="pn"><h2>Masterlist</h2><div class="g"><div class="f"><label>Agency</label><select onchange="mAg=this.value;rF()"><option value="">Select agency</option>${names.map(n=>`<option${n===mAg?' selected':''}>${esc(n)}</option>`).join('')}</select></div><div class="f"><label>Show</label><select onchange="mTab=this.value;rF()">${['All','Applicants','Active','Separated'].map(t=>`<option${t===mTab?' selected':''}>${t}</option>`).join('')}</select></div><div class="f"><label>Search</label><input value="${esc(mQ)}" oninput="mQ=this.value;$('mt').innerHTML=mT()"></div><div class="f"><label>&nbsp;</label><button class="b s" onclick="exportCSV(1)">Export this list</button></div></div><div id="mt" class="tw" style="margin-top:12px">${mT()}</div></div>`}
+function mT(){if(!mAg)return'<p class="mut">Select an agency.</p>';return`<table><tr><th>#</th><th>Employee No.</th><th>Full name</th><th>Type</th><th>Department</th><th>Position</th><th>Status</th><th>Start date</th></tr>${mRows().map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.tracking)}</td><td><b>${esc(fn(x))}</b></td><td>${esc(x.hireType)}</td><td>${esc(x.onboardDepartment||x.department)}</td><td>${esc(x.onboardPosition||x.position)}</td><td>${esc(x.employmentStatus||'Applicant')}</td><td>${esc(x.startDate)}</td></tr>`).join('')}</table>`}
+const COLS=['Employee Number','Surname','First Name','Middle Name','Hiring Type','Agency','Department','Position','Application Status','HR Approval','HR Approval Date/Time','Dept Head Approval','Dept Head Approval Date/Time','Background Check','Employment Status','Start Date','Separation Date','Separation Reason','Created By (User ID)','Created By (Name)','Created At','Last Edited By (User ID)','Last Edited By (Name)','Last Edited At','Application Status Date/Time','Application Status History','Clearance Signatures'];
+const rowOf=x=>[x.tracking,x.surname,x.firstName,x.middleName,x.hireType,x.agency,x.onboardDepartment||x.department,x.onboardPosition||x.position,x.applicationStatus,x.hrApproval,x.hrApproval_dt,x.dhApproval,x.dhApproval_dt,x.bgStatus,x.employmentStatus||'Applicant',x.startDate,x.separationDate,x.separationReason,x.createdById,x.createdBy,ft(x.createdAt),x.updatedById,x.updatedBy,ft(x.updatedAt),ft(x.statusAt),hs(x),sigs(x)];
+async function saveFile(fn,data){try{if(window.claude){const d=await claude.use('downloads');if(d){await d.save({filename:fn,data});return}}}catch(e){}try{await navigator.clipboard.writeText(data);toast('Download unavailable here - copied to clipboard')}catch(e){toast('Export unavailable in this view')}}
+const csv=a=>'\ufeff'+a.map(r=>r.map(v=>'"'+String(v==null?'':v).replace(/"/g,'""')+'"').join(',')).join('\r\n');
+function exportCSV(m){const r=m?mRows():vis(),c=db.dc.ems||{},d=r.map(x=>(x.createdAt||'').slice(0,10).replace(/-/g,'')).filter(Boolean).sort(),cov=d.length?(d[0]===d[d.length-1]?d[0]:d[0]+'-'+d[d.length-1]):nowL().slice(0,10).replace(/-/g,'');
+ saveFile([c.code||'NOCODE','Employee Management System'+(m?' - Masterlist':' - Records'),cov].join('_').replace(/[^\w .\-]+/g,'')+'.csv',csv([['Document','Document Code','Revision No.','Effectivity'],['Employee Management System',c.code||'',c.rev||'',c.eff||''],['Exported by (User ID)',user.id,'Exported at',ft(new Date().toISOString())],[],COLS,...r.map(rowOf)]))}
+let up=[];
+const UM={surname:'surname',firstname:'firstName',middlename:'middleName',agency:'agency',department:'department',position:'position',hiringtype:'hireType',employmentstatus:'employmentStatus',startdate:'startDate',birthday:'birthday',gender:'gender',civilstatus:'civilStatus',province:'curProvince',towncity:'curCity',barangay:'curBarangay',street:'curStreet'};
+function parseCSV(t){t=t.replace(/^\ufeff/,'');const r=[];let w=[],c='',q=false;for(let i=0;i<t.length;i++){const h=t[i];if(q){if(h=='"'){if(t[i+1]=='"'){c+='"';i++}else q=false}else c+=h}else if(h=='"')q=true;else if(h==','){w.push(c);c=''}else if(h=='\n'||h=='\r'){if(h=='\r'&&t[i+1]=='\n')i++;w.push(c);r.push(w);w=[];c=''}else c+=h}if(c!==''||w.length){w.push(c);r.push(w)}return r.filter(x=>x.some(v=>v.trim()))}
+function rG(){$('content').innerHTML=`<div class="pn"><h2>Bulk upload of applicants / existing employees</h2><p class="sub">Upload a CSV file (in Excel: Save As &rarr; CSV). Required columns: Surname, First Name. Optional: Middle Name, Agency, Department, Position, Hiring Type (Newly Hired / Re-hire / Existing Employee), Employment Status (Applicant / For Onboarding / Active / Separated), Start Date (YYYY-MM-DD), Birthday (YYYY-MM-DD), Gender, Civil Status, Province, Town/City, Barangay, Street.${user.role==='agency'?' Agency is set to your own agency.':''}</p>
+<div class="acts" style="margin:0 0 12px"><button class="b s" onclick="tpl()">Copy / download template</button></div><div class="f"><label>CSV file</label><input type="file" accept=".csv,text/csv" onchange="readUp(this.files[0])"></div><div id="upv" style="margin-top:12px"></div></div>`}
+function tpl(){saveFile('Employee_Upload_Template.csv',csv([['Surname','First Name','Middle Name','Agency','Department','Position','Hiring Type','Employment Status','Start Date','Birthday','Gender','Civil Status','Province','Town/City','Barangay','Street'],['Dela Cruz','Juan','Santos',AG[0],'Warehouse','Packer','Newly Hired','Applicant','','1995-05-20','Male','Single','Laguna','Nagcarlan','Poblacion','']]))}
+function readUp(f){if(!f)return;const r=new FileReader();r.onload=()=>{const t=parseCSV(String(r.result)),h=t[0].map(x=>x.toLowerCase().replace(/[^a-z]/g,'')),re=/^\d{4}-\d{2}-\d{2}$/;up=[];let bad=0;
+ t.slice(1).forEach(w=>{const o={};h.forEach((k,i)=>{if(UM[k])o[UM[k]]=(w[i]||'').trim()});['startDate','birthday'].forEach(k=>{if(o[k]&&!re.test(o[k]))o[k]=''});if(!o.surname||!o.firstName){bad++;return}if(user.role==='agency')o.agency=user.agency;if(o.hireType&&!HT.includes(o.hireType))o.hireType='';if(o.department&&!DEPTS.includes(o.department))o.department='';up.push(o)});
+ $('upv').innerHTML=`<p><b>${up.length}</b> row(s) ready to import${bad?`, <b>${bad}</b> skipped (missing surname or first name)`:''}. Departments not matching the list are left blank.</p>${up.length?`<div class="tw"><table><tr><th>Name</th><th>Agency</th><th>Department</th><th>Type</th><th>Status</th></tr>${up.slice(0,8).map(o=>`<tr><td>${esc(fn(o))}</td><td>${esc(o.agency)}</td><td>${esc(o.department)}</td><td>${esc(o.hireType)}</td><td>${esc(o.employmentStatus)}</td></tr>`).join('')}</table></div>${up.length>8?'<p class="mut">Showing first 8.</p>':''}<div class="acts"><button class="b" onclick="doUp()">Import ${up.length} record(s)</button></div>`:''}`};r.readAsText(f)}
+function doUp(){up.forEach(o=>db.emp.push({...newEmp(),...o,employmentStatus:o.employmentStatus||'Applicant',createdById:user.id,createdBy:user.name,updatedById:user.id,updatedBy:user.name,updatedAt:new Date().toISOString()}));sv();toast(up.length+' record(s) imported');up=[];rG()}
+function rH(){const O=(l,v)=>l.map(x=>`<option${x===v?' selected':''}>${esc(x)}</option>`).join('');$('content').innerHTML=`<div class="pn"><h2>Accounts</h2><p class="sub">Each person has their own ID. Edit details, set or reset passwords, add or remove accounts. Department heads see only the department assigned here.</p><div class="tw"><table><tr><th>ID</th><th>Name</th><th>Role</th><th>Agency / Department</th><th>Password</th><th></th></tr>${db.acc.map((a,i)=>`<tr><td>${esc(a.id)}</td><td><input value="${esc(a.name)}" onchange="ea(${i},'name',this.value)"></td><td><select onchange="ea(${i},'role',this.value);rH()">${Object.keys(ROLES).map(k=>`<option value="${k}"${k===a.role?' selected':''}>${ROLES[k]}</option>`).join('')}</select></td><td>${a.role==='agency'?`<select onchange="ea(${i},'agency',this.value)">${O(AG,a.agency)}</select>`:a.role==='depthead'?`<select onchange="ea(${i},'dept',this.value)"><option value="">(none)</option>${O(DEPTS,a.dept)}</select>`:'-'}</td><td>${db.pw[a.id]?'Set':'Not set'}<div style="display:flex;gap:4px;margin-top:4px"><input id="pw${i}" placeholder="new password" style="max-width:130px"><button class="b sm" onclick="setPw(${i})">Set</button></div></td><td>${a.id==='admin'?'':`<button class="b sm d" onclick="delA(${i})">Delete</button>`}</td></tr>`).join('')}</table></div>
+<div class="st" style="margin-top:18px">Add account</div><div class="g3 g"><div class="f"><label>ID</label><input id="na"></div><div class="f"><label>Name</label><input id="nn"></div><div class="f"><label>Role</label><select id="nr">${Object.keys(ROLES).map(k=>`<option value="${k}">${ROLES[k]}</option>`).join('')}</select></div></div><div class="acts"><button class="b" onclick="addA()">Add account</button></div></div>`}
+function ea(i,f,v){db.acc[i][f]=v;sv();if(db.acc[i].id===user.id)user=db.acc[i]}
+async function setPw(i){const v=$('pw'+i).value;if(v.length<6){toast('Use at least 6 characters');return}db.pw[db.acc[i].id]=await hp(db.acc[i].id,v);sv();toast('Password set');rH()}
+function delA(i){if(db.acc[i].id===user.id){toast('You cannot delete your own account');return}delete db.pw[db.acc[i].id];db.acc.splice(i,1);sv();rH()}
+function addA(){const id=$('na').value.trim().toLowerCase(),n=$('nn').value.trim();if(!id||!n||db.acc.some(a=>a.id.toLowerCase()===id)){toast('Enter a unique ID and a name');return}db.acc.push({id,name:n,role:$('nr').value,dept:'',agency:AG[0]});sv();rH()}
+function rI(){$('content').innerHTML=`<div class="pn"><h2>Document Control</h2><p class="sub">Enter the Document Code, Revision No. and Effectivity for each controlled document. They show on each form and in the export files. Every change is logged.</p>${DOCS.map(d=>{const c=db.dc[d[0]]||{};return`<div style="border-top:1px solid var(--ln);padding:12px 0"><b>${d[1]}</b><div class="g3 g" style="margin-top:8px"><div class="f"><label>Document code</label><input id="dc_${d[0]}c" value="${esc(c.code)}"></div><div class="f"><label>Revision no.</label><input id="dc_${d[0]}r" value="${esc(c.rev)}"></div><div class="f"><label>Effectivity</label><input id="dc_${d[0]}e" type="date" value="${esc(c.eff)}"></div><div class="f full"><label>Reason for change</label><input id="dc_${d[0]}w"></div></div><div class="acts"><button class="b sm" onclick="saveDC('${d[0]}')">Save</button></div></div>`}).join('')}</div><div class="pn"><h2>Revision history</h2><div class="tw"><table><tr><th>When</th><th>Document</th><th>By</th><th>Code / Rev / Effectivity</th><th>Reason</th></tr>${db.dcl.slice().reverse().map(l=>`<tr><td>${esc(l.at)}</td><td>${esc(l.doc)}</td><td>${esc(l.by)}</td><td>${esc(l.v)}</td><td>${esc(l.why)}</td></tr>`).join('')||'<tr><td colspan=5 class="mut">No revisions yet.</td></tr>'}</table></div></div>`}
+function saveDC(k){const g=s=>$('dc_'+k+s).value.trim(),n={code:g('c'),rev:g('r'),eff:g('e')},o=db.dc[k]||{};if(!n.code||!n.rev||!n.eff||!g('w')){toast('Complete code, revision, effectivity and reason');return}if(n.code===o.code&&n.rev===o.rev&&n.eff===o.eff){toast('No changes');return}db.dc[k]=n;db.dcl.push({at:nowL().replace('T',' '),doc:DOCS.find(d=>d[0]===k)[1],by:user.name,v:n.code+' / '+n.rev+' / '+n.eff,why:g('w')});sv();toast('Saved and logged');rI()}
+document.addEventListener('change',e=>{const t=e.target,k=t.dataset&&t.dataset.k;if(t.dataset&&t.dataset.dt){const d=document.querySelector('[data-k="'+t.dataset.dt+'"]');if(d)d.value=(t.type==='checkbox'?t.checked:t.value)?nowL():''}
+ if(k==='ch_n'){Object.assign(cur,collect());render()}
+ if(k==='same'&&t.value==='Same as Current Address'){copyAddr()}
+ if(k&&/^(cur|per)(Province|City)$/.test(k)){const p=k.slice(0,3),lv=k.slice(3);if(lv==='Province')fillAddr(p,{prov:t.value,city:'',brgy:''});else fillAddr(p,{prov:gv(p+'Province'),city:t.value,brgy:'',skipTown:1})}});
+
+/* Open access: skip log-in, enter as Admin (all tabs, no restriction) */
+(function(){const a0=db.acc.find(x=>x.id==='admin')||db.acc[0],a=Object.assign({},a0,{role:'admin'});user=a;$('login').hidden=true;$('app').hidden=false;$('who').textContent=a.name+' ('+ROLES.admin+')';
+$('nav').innerHTML=[...PERM.admin].map(k=>`<button data-p="${k}" onclick="setPage('${k}')">${TT[k]}</button>`).join('');cur=newEmp();setPage('A')})();
+
+/* Pre-seed official default passwords */
+const DEFAULT_EMS_PASSWORDS = {
+  admin: 'admin123',
+  hr1: 'hr123',
+  hr2: 'hr123',
+  dco: 'doc123',
+  om: 'ops123',
+  prod: 'dept123',
+  wh: 'dept123',
+  qa: 'dept123',
+  eng: 'dept123',
+  wb: 'agency123',
+  multi: 'agency123',
+  tj: 'agency123',
+  blgm: 'agency123',
+  omni: 'agency123'
+};
+
+async function seedDefaultPasswords() {
+  for (const [uid, pass] of Object.entries(DEFAULT_EMS_PASSWORDS)) {
+    if (!db.pw[uid]) {
+      db.pw[uid] = await hp(uid, pass);
+    }
+  }
+  sv();
+}
+seedDefaultPasswords();
+
+/* Password Eye Toggle Helper */
+function setupPassToggle(btnId, inputId) {
+  const btn = $(btnId), inp = $(inputId);
+  if (!btn || !inp) return;
+  btn.onclick = () => {
+    if (inp.type === 'password') {
+      inp.type = 'text';
+      btn.textContent = '🙈';
+      btn.title = 'Hide password';
+    } else {
+      inp.type = 'password';
+      btn.textContent = '👁️';
+      btn.title = 'Show password';
+    }
+    inp.focus();
+  };
+}
+setupPassToggle('lpToggle', 'lp');
+setupPassToggle('lc2Toggle', 'lc2');
+
+/* Remember Password Management */
+const EMS_REM_KEY = 'ems_saved_passwords_v1';
+function getSavedPasswords() {
+  try { return JSON.parse(localStorage.getItem(EMS_REM_KEY) || '{}'); } catch(e) { return {}; }
+}
+function saveUserPassword(u, p, remember) {
+  try {
+    const map = getSavedPasswords();
+    if (remember && p) map[u.toLowerCase()] = p;
+    else delete map[u.toLowerCase()];
+    localStorage.setItem(EMS_REM_KEY, JSON.stringify(map));
+  } catch(e) {}
+}
+function checkSavedPass(u) {
+  u = (u || '').toLowerCase().trim();
+  const map = getSavedPasswords();
+  const pInput = $('lp'), remChk = $('lrem'), forgetBtn = $('lforget');
+  if (u && map[u]) {
+    pInput.value = map[u];
+    if (remChk) remChk.checked = true;
+    if (forgetBtn) forgetBtn.style.display = 'inline-block';
+  } else {
+    pInput.value = '';
+    if (remChk) remChk.checked = false;
+    if (forgetBtn) forgetBtn.style.display = 'none';
+  }
+}
+if ($('lu')) {
+  $('lu').oninput = () => checkSavedPass($('lu').value);
+}
+if ($('lforget')) {
+  $('lforget').onclick = () => {
+    const u = $('lu').value.toLowerCase().trim();
+    const map = getSavedPasswords();
+    delete map[u];
+    localStorage.setItem(EMS_REM_KEY, JSON.stringify(map));
+    $('lp').value = '';
+    $('lrem').checked = false;
+    $('lforget').style.display = 'none';
+    toast('Saved password forgotten for ' + u);
+  };
+}
+
+/* Quick Account Buttons */
+const qaContainer = $('quickAccs');
+if (qaContainer) {
+  qaContainer.onclick = (e) => {
+    const btn = e.target.closest('button[data-u]');
+    if (!btn) return;
+    const u = btn.dataset.u;
+    const p = btn.dataset.p;
+    $('lu').value = u;
+    checkSavedPass(u);
+    if (!$('lp').value && p) {
+      $('lp').value = p;
+      $('lrem').checked = true;
+    }
+    $('lp').focus();
+    $('lp').select();
+  };
+}
+
+</script>
+<script src="cloud-sync.js"></script></body></html>
