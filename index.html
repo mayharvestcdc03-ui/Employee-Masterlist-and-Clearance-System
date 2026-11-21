@@ -205,7 +205,7 @@ const vis=()=>{const e=db.emp;if(user.role==='agency')return e.filter(x=>x.agenc
 const fn=x=>(x.surname?x.surname+(x.firstName?', ':''):'')+[x.firstName,x.middleName].filter(Boolean).join(' ')||'(no name)';
 const K=()=>[...document.querySelectorAll('#content [data-k]')];
 const collect=()=>{const o={};K().forEach(e=>o[e.dataset.k]=e.type==='checkbox'?e.checked:e.value.trim());return o};
-const loadV=()=>{setTimeout(addrInit,0);K().forEach(e=>{const v=cur[e.dataset.k];if(e.type==='checkbox')e.checked=!!v;else{if(e.tagName==='SELECT'&&v&&![...e.options].some(o=>o.value===v||o.text===v))e.add(new Option(v,v));e.value=v==null?'':v}});if(user&&user.role==='agency'){const a=document.querySelector('[data-k=agency]');if(a){a.value=user.agency;a.disabled=true}}};
+const loadV=()=>{if(typeof renderPhotoBox==='function')renderPhotoBox();setTimeout(addrInit,0);K().forEach(e=>{const v=cur[e.dataset.k];if(e.type==='checkbox')e.checked=!!v;else{if(e.tagName==='SELECT'&&v&&![...e.options].some(o=>o.value===v||o.text===v))e.add(new Option(v,v));e.value=v==null?'':v}});if(user&&user.role==='agency'){const a=document.querySelector('[data-k=agency]');if(a){a.value=user.agency;a.disabled=true}}};
 function upsert(){const o0=db.emp.find(x=>x.id===cur.id)||{};Object.assign(cur,collect());logH(o0,cur);if(user.role==='agency')cur.agency=user.agency;cur.updatedBy=user.name;cur.updatedById=user.id;cur.updatedAt=new Date().toISOString();const i=db.emp.findIndex(x=>x.id===cur.id);if(i<0){cur.createdById=user.id;cur.createdBy=user.name;db.emp.push(cur)}else db.emp[i]=cur;sv();cur=JSON.parse(JSON.stringify(cur))}
 const F=(l,k,o,t,full,x)=>`<div class="f${full?' full':''}"><label>${l}</label>${o?`<select data-k="${k}"><option value="">Select</option>${o.map(v=>`<option>${esc(v)}</option>`).join('')}</select>`:`<input data-k="${k}" type="${t||'text'}" ${x||''}>`}</div>`;
 const FT=(l,k,o,h)=>`<div class="f${h?' hl':''}"><label>${l}</label><select data-k="${k}" data-dt="${k}_dt"><option value="">Select</option>${o.map(v=>`<option>${esc(v)}</option>`).join('')}</select><input data-k="${k}_dt" type="datetime-local" readonly title="Auto date/time"></div>`;
@@ -240,7 +240,89 @@ async function fillAddr(p,v){const C=p+'City',B=p+'Barangay';
  try{const bl=await brgys(v.prov,v.city);if(gv(C)!==v.city)return;setOpts(B,bl,v.brgy,'Select')}catch(e){toText(B,v.brgy)}}
 function addrInit(){['cur','per'].forEach(p=>{if(document.querySelector('#content [data-k='+p+'Province]'))fillAddr(p,{prov:cur[p+'Province']||'',city:cur[p+'City']||'',brgy:cur[p+'Barangay']||''})})}
 function copyAddr(){const g=s=>gv('cur'+s);const pr=document.querySelector('#content [data-k=perProvince]'),st=document.querySelector('#content [data-k=perStreet]');if(pr)pr.value=g('Province');if(st)st.value=g('Street');fillAddr('per',{prov:g('Province'),city:g('City'),brgy:g('Barangay')})}
-function rA(){const kids=Math.min(15,+cur.ch_n||0);$('content').innerHTML=`<div class="pn"><h2>Personal Information Form</h2>${dcl('pif')}<p class="sub">Create a new record or select an existing one.</p>${pick()}<div class="g">
+
+function handle2x2Upload(inp){
+  const f = inp.files && inp.files[0];
+  if(!f) return;
+  if(f.size > 8 * 1024 * 1024){
+    toast('Masyadong malaki ang picture (maximum 8MB)');
+    inp.value = '';
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const img = new Image();
+    img.onload = function(){
+      const canvas = document.createElement('canvas');
+      const maxDim = 400;
+      let w = img.width, h = img.height;
+      const size = Math.min(w, h);
+      const sx = (w - size) / 2;
+      const sy = (h - size) / 2;
+      canvas.width = maxDim;
+      canvas.height = maxDim;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, sx, sy, size, size, 0, 0, maxDim, maxDim);
+      cur.photo = canvas.toDataURL('image/jpeg', 0.86);
+      renderPhotoBox();
+      toast('2x2 picture uploaded');
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(f);
+}
+function removePhoto(){
+  delete cur.photo;
+  const inp = $('photo_input');
+  if(inp) inp.value = '';
+  renderPhotoBox();
+  toast('Inalis ang 2x2 picture');
+}
+function renderPhotoBox(){
+  const p = $('photo_preview');
+  if(!p) return;
+  const isRo = typeof RO === 'function' ? RO() : false;
+  if(cur && cur.photo){
+    p.innerHTML = '<img src="' + cur.photo + '" style="width:100%;height:100%;object-fit:cover">';
+  } else {
+    p.innerHTML = '<div style="font-size:32px;color:var(--mute)">📷</div><div style="font-size:11px;font-weight:600;color:var(--tx);margin-top:4px">2x2 ID Photo</div><div style="font-size:10px;color:var(--mute)">' + (isRo ? 'No photo' : 'I-click para mag-upload') + '</div>';
+  }
+  const btnDiv = $('photo_acts');
+  if(btnDiv){
+    if(isRo){
+      btnDiv.innerHTML = (cur && cur.photo) ? '<button type="button" class="b sm s" onclick="viewPhoto(\'' + cur.id + '\')">View photo</button>' : '<span class="mut" style="font-size:11px">Read-only mode</span>';
+    } else {
+      btnDiv.innerHTML = '<button type="button" class="b sm s" onclick="$(\'photo_input\').click()">' + ((cur && cur.photo) ? 'Palitan' : 'Mag-upload') + '</button>' +
+        ((cur && cur.photo) ? ' <button type="button" class="b sm d" onclick="removePhoto()">Alisin</button>' : '');
+    }
+  }
+}
+function viewPhoto(id){
+  const e = db.emp.find(x => x.id === id);
+  if(!e || !e.photo){ toast('Walang naka-upload na 2x2 picture.'); return; }
+  const w = window.open('');
+  w.document.write('<title>2x2 Photo - ' + esc(fn(e)) + '</title><body style="margin:0;background:#111;display:flex;justify-content:center;align-items:center;min-height:100vh"><img src="' + e.photo + '" style="max-width:90vw;max-height:90vh;border-radius:8px;box-shadow:0 0 24px rgba(0,0,0,0.6)"></body>');
+}
+
+function rA(){const kids=Math.min(15,+cur.ch_n||0);$('content').innerHTML=`<div class="pn"><h2>Personal Information Form</h2>${dcl('pif')}<p class="sub">Create a new record or select an existing one.</p>${pick()}
+<div style="display:flex;gap:20px;align-items:flex-start;flex-wrap:wrap;margin:12px 0 16px;padding:14px;background:var(--bg);border:1px solid var(--bd);border-radius:8px">
+  <div style="text-align:center">
+    <div id="photo_preview" style="width:130px;height:130px;border:2px dashed var(--bd);border-radius:6px;overflow:hidden;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative;cursor:pointer" onclick="$('photo_input').click()" title="I-click para mag-upload ng 2x2 picture">
+      ${cur.photo ? `<img src="${cur.photo}" style="width:100%;height:100%;object-fit:cover">` : `<div style="font-size:32px;color:var(--mute)">📷</div><div style="font-size:11px;font-weight:600;color:var(--tx);margin-top:4px">2x2 ID Photo</div><div style="font-size:10px;color:var(--mute)">I-click para mag-upload</div>`}
+    </div>
+    <input type="file" id="photo_input" accept="image/*" onchange="handle2x2Upload(this)" style="display:none">
+    <div id="photo_acts" style="margin-top:8px;display:flex;gap:6px;justify-content:center">
+      <button type="button" class="b sm s" onclick="$('photo_input').click()">${cur.photo ? 'Palitan' : 'Mag-upload'}</button>
+      ${cur.photo ? `<button type="button" class="b sm d" onclick="removePhoto()">Alisin</button>` : ''}
+    </div>
+  </div>
+  <div style="flex:1 1 240px">
+    <h3 style="margin:0 0 6px;font-size:15px">2x2 ID Picture</h3>
+    <p class="mut" style="font-size:12.5px;margin:0 0 8px;line-height:1.4">Mag-upload ng malinaw na 2x2 ID picture ng empleyado o aplikante (formal attire, white o neutral background). Awtomatiko itong ia-adjust sa tamang 2x2 proportion para sa masterlist at 201 file.</p>
+    <div style="font-size:12px;color:var(--mute)">Tumatanggap ng JPG, PNG, o WebP (hanggang 8MB). Awtomatikong naka-optimize para mabilis mag-load at mag-sync.</div>
+  </div>
+</div>
+<div class="g">
 ${F('Hiring type','hireType',HT)}${F('Application type','applicationType',['Walk-in','Referral','From Agency','From EMHCO'])}${F('Referring employee name','referralName')}${F('Employee number','tracking',null,'text',0,'readonly')}
 ${T('Personal Information')}${F('Surname','surname')}${F('First name','firstName')}${F('Middle name','middleName')}${F('Birthday','birthday','','date')}${F('Gender','gender',['Male','Female','Prefer not to say'])}${F('Civil status','civilStatus',['Single','Married','Widowed','Separated'])}
 ${addr('cur','Current Address')}${T('Permanent Address')}${F('Same as current?','same',['Same as Current Address','No'])}${F('Province','perProvince',PROV)}${F('Town / City','perCity',[])}${F('Barangay','perBarangay',[])}${F('House Number & Street','perStreet')}
@@ -272,7 +354,7 @@ ${T('Orientation (tick, then set date/time and trainer)')}<div class="full">${OR
 ${T('Onboarding &amp; Active Employment')}${F('Department / section','onboardDepartment',DEPTS)}${F('Position','onboardPosition')}${F('Assigned team leader','teamLeader')}${F('Start date','startDate','','date')}${F('Agency deployment confirmation','deploymentConfirmation',['Pending','Confirmed'])}${F('Employment status','employmentStatus',['Applicant','For Onboarding','Active','Separated'])}
 ${T('Separation')}${F('Separation date','separationDate','','date')}${F('Reason for separation','separationReason',['Resignation','Termination','End of Contract','AWOL','Transferred to Other Company','Others'])}<div class="f full"><label>Separation remarks</label><textarea data-k="separationRemarks"></textarea></div></div>
 <div class="acts"><button class="b sv" onclick="upsert();toast('Saved')">Save deployment record</button>${RO()?`<button class="b" onclick="saveDH()">Save department head's approval</button>`:''}${PERM[user.role].includes('A')?`<button class="b s" onclick="setPage('A')">Personal information</button>`:''}</div></div>${tbl()}`}
-function tbl(){const v=vis();return`<div class="pn"><h2>Records</h2><div class="tw"><table><tr><th>Employee No.</th><th>Name</th><th>Agency</th><th>Type</th><th>Status</th><th></th></tr>${v.map(x=>`<tr><td>${esc(x.tracking)}</td><td>${esc(fn(x))}</td><td>${esc(x.agency)}</td><td>${esc(x.hireType)}</td><td><span class="pill">${esc(x.employmentStatus||x.applicationStatus||'Applicant')}</span></td><td><button class="b sm s" onclick="pickE('${x.id}')">${RO()?'View':'Edit'}</button> <button class="b sm d sv" onclick="delE('${x.id}')">Delete</button></td></tr>`).join('')||'<tr><td colspan=6 class="mut">No records.</td></tr>'}</table></div></div>`}
+function tbl(){const v=vis();return`<div class="pn"><h2>Records</h2><div class="tw"><table><tr><th>Photo</th><th>Employee No.</th><th>Name</th><th>Agency</th><th>Type</th><th>Status</th><th></th></tr>${v.map(x=>`<tr><td>${x.photo?`<img src="${x.photo}" style="width:34px;height:34px;border-radius:4px;object-fit:cover;vertical-align:middle;border:1px solid var(--bd);cursor:pointer" onclick="viewPhoto('${x.id}')" title="Click to view full photo">`:`<div style="width:34px;height:34px;border-radius:4px;background:var(--bg);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--mute)">👤</div>`}</td><td>${esc(x.tracking)}</td><td>${esc(fn(x))}</td><td>${esc(x.agency)}</td><td>${esc(x.hireType)}</td><td><span class="pill">${esc(x.employmentStatus||x.applicationStatus||'Applicant')}</span></td><td><button class="b sm s" onclick="pickE('${x.id}')">${RO()?'View':'Edit'}</button> <button class="b sm d sv" onclick="delE('${x.id}')">Delete</button></td></tr>`).join('')||'<tr><td colspan=7 class="mut">No records.</td></tr>'}</table></div></div>`}
 function delE(id){if(!confirm('Delete this record?'))return;db.emp=db.emp.filter(x=>x.id!==id);sv();if(cur.id===id)cur=newEmp();render()}
 function rC(){const v=vis();$('content').innerHTML=`<div class="pn"><h2>Issuance of Accountable Items</h2>${dcl('itm')}<div class="g">
 <div class="f"><label>Employee</label><select id="ie"><option value="">Select</option>${v.map(x=>`<option value="${x.id}">${esc(x.tracking)} - ${esc(fn(x))}</option>`).join('')}</select></div><div class="f"><label>Issuance date</label><input id="id" type="date" value="${nowL().slice(0,10)}"></div>
@@ -334,7 +416,7 @@ return`<div class="pn"><h2>Pending approvals, no-shows and cancelled application
 function rE(){const a=dsrc(),c=f=>a.filter(f).length;$('content').innerHTML=`<div class="cards">${[['Total records',a.length],['Approved',c(x=>x.applicationStatus==='Approved')],['Requirements verified',c(x=>x.verification==='Verified')],['Orientation completed',c(x=>x.orientationCompletion==='Completed')],['For onboarding',c(x=>x.employmentStatus==='For Onboarding')],['Active',c(x=>x.employmentStatus==='Active')],['Separated',c(x=>x.employmentStatus==='Separated')],['Background check cleared',c(x=>x.bgStatus==='Cleared')],['Pending approval',c(x=>PEND.includes(x.applicationStatus))],['No show',c(x=>x.applicationStatus==='No Show')],['Cancelled',c(x=>x.applicationStatus==='Cancelled')]].map(z=>`<div class="cd"><small>${z[0]}</small><b>${z[1]}</b></div>`).join('')}</div>${apprHtml()}${man()}${pendHtml()}<div class="pn"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><h2>Status overview</h2><button class="b sm s" onclick="exportHist()">Export status history</button></div><div class="tw"><table><tr><th>Employee No.</th><th>Employee</th><th>Agency</th><th>Department</th><th>Application</th><th>Requirements</th><th>Background</th><th>Employment</th></tr>${a.map(x=>`<tr><td>${esc(x.tracking)}</td><td>${nl(x)}</td><td>${esc(x.agency)}</td><td>${esc(x.department||x.onboardDepartment)}</td><td>${esc(x.applicationStatus||'Pending')}<div class="mut">${esc(ft(x.statusAt))}</div></td><td>${esc(x.verification||'Pending')}</td><td>${esc(x.bgStatus||'Pending')}</td><td>${esc(x.employmentStatus||'Applicant')}</td></tr>`).join('')||'<tr><td colspan=8 class="mut">No records.</td></tr>'}</table></div></div>`}
 const mRows=()=>vis().filter(x=>(x.agency||'No Agency')===mAg).filter(x=>mTab==='All'||(mTab==='Applicants'?['Applicant','For Onboarding',undefined,''].includes(x.employmentStatus):x.employmentStatus===mTab)).filter(x=>!mQ||(fn(x)+x.tracking+(x.department||x.onboardDepartment)+x.position).toLowerCase().includes(mQ.toLowerCase())).sort((a,b)=>fn(a).localeCompare(fn(b)));
 function rF(){const names=[...AG,...new Set(vis().map(x=>x.agency).filter(n=>n&&!AG.includes(n)))];$('content').innerHTML=`<div class="pn"><h2>Masterlist</h2><div class="g"><div class="f"><label>Agency</label><select onchange="mAg=this.value;rF()"><option value="">Select agency</option>${names.map(n=>`<option${n===mAg?' selected':''}>${esc(n)}</option>`).join('')}</select></div><div class="f"><label>Show</label><select onchange="mTab=this.value;rF()">${['All','Applicants','Active','Separated'].map(t=>`<option${t===mTab?' selected':''}>${t}</option>`).join('')}</select></div><div class="f"><label>Search</label><input value="${esc(mQ)}" oninput="mQ=this.value;$('mt').innerHTML=mT()"></div><div class="f"><label>&nbsp;</label><button class="b s" onclick="exportCSV(1)">Export this list</button></div></div><div id="mt" class="tw" style="margin-top:12px">${mT()}</div></div>`}
-function mT(){if(!mAg)return'<p class="mut">Select an agency.</p>';return`<table><tr><th>#</th><th>Employee No.</th><th>Full name</th><th>Type</th><th>Department</th><th>Position</th><th>Status</th><th>Start date</th></tr>${mRows().map((x,i)=>`<tr><td>${i+1}</td><td>${esc(x.tracking)}</td><td><b>${esc(fn(x))}</b></td><td>${esc(x.hireType)}</td><td>${esc(x.onboardDepartment||x.department)}</td><td>${esc(x.onboardPosition||x.position)}</td><td>${esc(x.employmentStatus||'Applicant')}</td><td>${esc(x.startDate)}</td></tr>`).join('')}</table>`}
+function mT(){if(!mAg)return'<p class="mut">Select an agency.</p>';return`<table><tr><th>#</th><th>Photo</th><th>Employee No.</th><th>Full name</th><th>Type</th><th>Department</th><th>Position</th><th>Status</th><th>Start date</th></tr>${mRows().map((x,i)=>`<tr><td>${i+1}</td><td>${x.photo?`<img src="${x.photo}" style="width:34px;height:34px;border-radius:4px;object-fit:cover;vertical-align:middle;border:1px solid var(--bd);cursor:pointer" onclick="viewPhoto('${x.id}')" title="Click to view full photo">`:`<div style="width:34px;height:34px;border-radius:4px;background:var(--bg);border:1px solid var(--bd);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--mute)">👤</div>`}</td><td>${esc(x.tracking)}</td><td><b>${esc(fn(x))}</b></td><td>${esc(x.hireType)}</td><td>${esc(x.onboardDepartment||x.department)}</td><td>${esc(x.onboardPosition||x.position)}</td><td>${esc(x.employmentStatus||'Applicant')}</td><td>${esc(x.startDate)}</td></tr>`).join('')}</table>`}
 const COLS=['Employee Number','Surname','First Name','Middle Name','Hiring Type','Agency','Department','Position','Application Status','HR Approval','HR Approval Date/Time','Dept Head Approval','Dept Head Approval Date/Time','Background Check','Employment Status','Start Date','Separation Date','Separation Reason','Created By (User ID)','Created By (Name)','Created At','Last Edited By (User ID)','Last Edited By (Name)','Last Edited At','Application Status Date/Time','Application Status History','Clearance Signatures'];
 const rowOf=x=>[x.tracking,x.surname,x.firstName,x.middleName,x.hireType,x.agency,x.onboardDepartment||x.department,x.onboardPosition||x.position,x.applicationStatus,x.hrApproval,x.hrApproval_dt,x.dhApproval,x.dhApproval_dt,x.bgStatus,x.employmentStatus||'Applicant',x.startDate,x.separationDate,x.separationReason,x.createdById,x.createdBy,ft(x.createdAt),x.updatedById,x.updatedBy,ft(x.updatedAt),ft(x.statusAt),hs(x),sigs(x)];
 async function saveFile(fn,data){try{if(window.claude){const d=await claude.use('downloads');if(d){await d.save({filename:fn,data});return}}}catch(e){}try{await navigator.clipboard.writeText(data);toast('Download unavailable here - copied to clipboard')}catch(e){toast('Export unavailable in this view')}}
