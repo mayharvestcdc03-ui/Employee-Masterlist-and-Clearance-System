@@ -160,7 +160,8 @@
             Object.assign(db, fresh);
           } catch (_) {}
         }
-        if (typeof render === 'function' && typeof user !== 'undefined' && user) {
+        const isEditing = document.activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName) && document.activeElement.closest('#content');
+        if (!isEditing && typeof render === 'function' && typeof user !== 'undefined' && user) {
           render();
         }
         setCloudStatus(true, `Updated from ${sourceName}`);

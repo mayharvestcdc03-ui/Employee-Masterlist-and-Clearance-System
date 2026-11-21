@@ -323,7 +323,7 @@ function rA(){const kids=Math.min(15,+cur.ch_n||0);$('content').innerHTML=`<div 
   </div>
 </div>
 <div class="g">
-${F('Hiring type','hireType',HT)}${F('Application type','applicationType',['Walk-in','Referral','From Agency','From EMHCO'])}${F('Referring employee name','referralName')}${F('Employee number','tracking',null,'text',0,'readonly')}
+${F('Hiring type','hireType',HT)}${F('Application type','applicationType',['Walk-in','Referral','From Agency','From EMHCO'])}${F('Referring employee name','referralName')}${F('Employee number','tracking',null,'text',0)}
 ${T('Personal Information')}${F('Surname','surname')}${F('First name','firstName')}${F('Middle name','middleName')}${F('Birthday','birthday','','date')}${F('Gender','gender',['Male','Female','Prefer not to say'])}${F('Civil status','civilStatus',['Single','Married','Widowed','Separated'])}
 ${addr('cur','Current Address')}${T('Permanent Address')}${F('Same as current?','same',['Same as Current Address','No'])}${F('Province','perProvince',PROV)}${F('Town / City','perCity',[])}${F('Barangay','perBarangay',[])}${F('House Number & Street','perStreet')}
 ${T('Family Information')}${F("Mother's maiden name",'motherName')}${F("Mother's age",'motherAge','','number')}${F("Father's name",'fatherName')}${F("Father's age",'fatherAge','','number')}${F('Spouse name','spouseName')}${F('Spouse age','spouseAge','','number')}
@@ -337,16 +337,22 @@ const crCount=()=>{let m=Math.max(1,+cur.cr_n||0);for(let i=0;i<10;i++)if(['n','
 const crNames=()=>{const o=[];for(let i=0;i<crCount();i++){const v=(cur['cr'+i+'n']||'').trim();if(v&&!o.includes(v))o.push(v)}return o};
 function addRef(){Object.assign(cur,collect());if(crCount()>=10){toast('Maximum of 10 references');return}cur.cr_n=crCount()+1;render()}
 function refBg(){const e=document.querySelector('#content [data-k=bgRef]');if(!e)return;const v=e.value,N=[...document.querySelectorAll('#content [data-k]')].filter(x=>/^cr\d+n$/.test(x.dataset.k)).map(x=>x.value.trim()).filter((x,i,a)=>x&&a.indexOf(x)===i);if(v&&!N.includes(v))N.push(v);e.innerHTML='<option value="">Select reference person</option>'+N.map(x=>'<option>'+esc(x)+'</option>').join('');e.value=v}
+document.addEventListener('input', e => {
+  const t = e.target, k = t && t.dataset && t.dataset.k;
+  if (k) {
+    cur[k] = t.type === 'checkbox' ? t.checked : t.value;
+  }
+});
 document.addEventListener('change',e=>{if(e.target.dataset&&/^cr\d+n$/.test(e.target.dataset.k))refBg()});
 function rK(){const n=crCount();let refs='';for(let i=0;i<n;i++)refs+=`<div class="st" style="font-size:13px">Reference ${i+1}</div>`+F('Name','cr'+i+'n')+F('Company','cr'+i+'c')+F('Position','cr'+i+'p')+F('Contact number','cr'+i+'t')+F('Relation to the applicant','cr'+i+'r');
 $('content').innerHTML=`<div class="pn"><h2>Character Reference &amp; Background Checking</h2><p class="sub">Select the employee record, then record the character references and the background check result.</p>${pick()}<div class="g">
-${F('Employee number','tracking',null,'text',0,'readonly')}${F('Employee name','_nm',null,'text',0,'readonly disabled')}
+${F('Employee number','tracking',null,'text',0)}${F('Employee name','_nm',null,'text',0,'readonly disabled')}
 ${T('Character References')}${refs}</div>
 <div class="acts"><button class="b s sv" onclick="addRef()">+ Add reference</button></div>
 <div class="g">${T('Background Checking')}${F('Reference person checked','bgRef',crNames())}${FT('Background check status','bgStatus',['Pending','Ongoing','Cleared','With Findings'])}${F('Remarks','bgRemarks')}</div>
 <div class="acts"><button class="b s" onclick="if(user.role!=='depthead')saveForm();setPage('A')">Back: Personal information</button><button class="b sv" onclick="saveForm()">Save</button><button class="b s" onclick="if(user.role!=='depthead')saveForm();setPage('B')">Next: Deployment information</button></div></div>`;const m=document.querySelector('[data-k=_nm]');if(m)m.removeAttribute('data-k'),m.value=fn(cur)}
 function rB(){$('content').innerHTML=`<div class="pn"><h2>Deployment &amp; Employment Processing</h2>${dcl('dep')}${pick()}<div class="g">
-${F('Employee number','tracking',null,'text',0,'readonly')}${F('Agency name','agency',AG)}${F("Agency coordinator's name",'coordinator')}${F('Deployment date','deploymentDate','','date')}${F('Department / assigned area','department',DEPTS)}${F('Position desired','position')}
+${F('Employee number','tracking',null,'text',0)}${F('Agency name','agency',AG)}${F("Agency coordinator's name",'coordinator')}${F('Deployment date','deploymentDate','','date')}${F('Department / assigned area','department',DEPTS)}${F('Position desired','position')}
 ${T('Application &amp; Approval (date/time is recorded automatically at each step)')}${F('Application date','applicationDate','','date')}${FT('Application status','applicationStatus',['For Screening','For Interview','For Medical','For HR Approval','For Department Head Approval','Approved','Disapproved','No Show','Cancelled'])}${FT('Initial screening','screening',['Pending','Passed','Failed'])}${FT('Interview results','interview',['Pending','Passed','Failed'])}${FT('Medical examination','medical',['Pending','Fit to Work','Unfit','Not Applicable'])}${FT('HR approval','hrApproval',['Pending','Approved','Disapproved'])}${FT("Department head's approval (Department Heads: update this field)",'dhApproval',['Pending','Approved','Disapproved'],1)}${F('Position granted','grantedPosition')}<div class="f full"><label>Approval remarks</label><textarea data-k="approvalRemarks"></textarea></div>
 ${T('Requirements Compliance (date is recorded when ticked)')}<div class="full">${REQ.map((n,i)=>`<div class="ck"><label style="flex:1 1 180px"><input type="checkbox" data-k="r${i}" data-dt="r${i}_dt"> ${n}</label><input data-k="r${i}_dt" type="datetime-local" readonly></div>`).join('')}</div>
 ${F('Verification status','verification',['Pending','Verified','With Pending Requirements'])}${F('Requirement expiration date','expirationDate','','date')}<div class="f full"><label>Pending requirements</label><textarea data-k="pendingRequirements"></textarea></div>
