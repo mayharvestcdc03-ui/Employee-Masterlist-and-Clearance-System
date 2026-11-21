@@ -66,15 +66,16 @@ input[type=checkbox]{width:auto}input[readonly]{opacity:.75}textarea{min-height:
 </form>
 
 <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--ln);">
-  <div style="font-size:11px; font-weight:700; color:var(--mut); text-transform:uppercase; margin-bottom:6px;">Quick Account Select:</div>
-  <div style="display:flex; flex-wrap:wrap; gap:4px;" id="quickAccs">
-    <button type="button" class="b s sm" data-u="admin" data-p="admin123">👑 admin</button>
-    <button type="button" class="b s sm" data-u="hr1" data-p="hr123">👥 hr1</button>
-    <button type="button" class="b s sm" data-u="om" data-p="ops123">⚙️ om</button>
-    <button type="button" class="b s sm" data-u="prod" data-p="dept123">🏭 prod</button>
-    <button type="button" class="b s sm" data-u="wh" data-p="dept123">📦 wh</button>
-    <button type="button" class="b s sm" data-u="dco" data-p="doc123">📋 dco</button>
-    <button type="button" class="b s sm" data-u="wb" data-p="agency123">🏢 wb (Agency)</button>
+  <div style="font-size:11px; font-weight:700; color:var(--mut); text-transform:uppercase; margin-bottom:8px;">
+    Official Roles &amp; Accounts (Click to select):
+  </div>
+  <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:6px;" id="quickAccs">
+    <button type="button" class="b s sm" data-u="admin" data-p="admin123" style="text-align:left; padding:6px 8px;">👑 <b>Admin</b><div style="font-size:10px; color:var(--mut); font-weight:normal">admin / admin123</div></button>
+    <button type="button" class="b s sm" data-u="hr" data-p="hr123" style="text-align:left; padding:6px 8px;">👥 <b>HR</b><div style="font-size:10px; color:var(--mut); font-weight:normal">hr / hr123</div></button>
+    <button type="button" class="b s sm" data-u="doccontrol" data-p="doc123" style="text-align:left; padding:6px 8px;">📋 <b>Doc Control</b><div style="font-size:10px; color:var(--mut); font-weight:normal">doccontrol / doc123</div></button>
+    <button type="button" class="b s sm" data-u="opsmanager" data-p="ops123" style="text-align:left; padding:6px 8px;">⚙️ <b>Operations Mgr</b><div style="font-size:10px; color:var(--mut); font-weight:normal">opsmanager / ops123</div></button>
+    <button type="button" class="b s sm" data-u="depthead" data-p="dept123" style="text-align:left; padding:6px 8px;">🏢 <b>Dept Head</b><div style="font-size:10px; color:var(--mut); font-weight:normal">depthead / dept123</div></button>
+    <button type="button" class="b s sm" data-u="agency" data-p="agency123" style="text-align:left; padding:6px 8px;">🤝 <b>Agency</b><div style="font-size:10px; color:var(--mut); font-weight:normal">agency / agency123</div></button>
   </div>
 </div>
 </div></div>
@@ -97,7 +98,35 @@ const ROLES={admin:'Admin',hr:'HR',agency:'Agency',depthead:'Department Head',om
 const PERM={admin:'AKBCDEFGHIJ',hr:'AKBCDEFGJ',agency:'AKBCDEF',depthead:'AKBCDEFJ',om:'AKBCDEFJ',dco:'I'};
 const TT={A:'Personal Information',B:'Deployment Information',C:'Accountable Items',D:'Clearance Process',E:'Dashboard',F:'Masterlist',G:'Bulk Upload',H:'Accounts',I:'Document Control',J:'Other Sources',K:'Character Reference & Background Check'};
 const DOCS=[['ems','Employee Management System'],['pif','Personal Information Form'],['dep','Deployment Information'],['itm','Accountable Items Issuance'],['clr','Clearance Form']];
-if(!db.acc)db.acc=[['admin','Admin Head','admin'],['hr1','HR 1','hr'],['hr2','HR 2','hr'],['dco','Document Control Officer','dco'],['om','Operations Manager','om'],['prod','Production Head','depthead'],['wh','Warehouse Head','depthead'],['qa','Quality Head','depthead'],['eng','Engineering Head','depthead']].map(a=>({id:a[0],name:a[1],role:a[2],dept:''})).concat([['wb',0],['multi',1],['tj',2],['blgm',3],['omni',4]].map(a=>({id:a[0],name:AG[a[1]],role:'agency',agency:AG[a[1]]})));
+/* Official Organization Accounts Setup */
+const OFFICIAL_SYSTEM_ACCOUNTS = [
+  { id: 'admin', name: 'System Administrator', role: 'admin', dept: '' },
+  { id: 'hr', name: 'HR Department', role: 'hr', dept: '' },
+  { id: 'hr1', name: 'HR Officer 1', role: 'hr', dept: '' },
+  { id: 'hr2', name: 'HR Officer 2', role: 'hr', dept: '' },
+  { id: 'doccontrol', name: 'Document Control Officer', role: 'dco', dept: '' },
+  { id: 'dco', name: 'Document Control Officer', role: 'dco', dept: '' },
+  { id: 'opsmanager', name: 'Operations Manager', role: 'om', dept: '' },
+  { id: 'om', name: 'Operations Manager', role: 'om', dept: '' },
+  { id: 'depthead', name: 'Department Head', role: 'depthead', dept: 'Production' },
+  { id: 'prod', name: 'Production Head', role: 'depthead', dept: 'Production' },
+  { id: 'wh', name: 'Warehouse Head', role: 'depthead', dept: 'Warehouse' },
+  { id: 'qa', name: 'Quality Head', role: 'depthead', dept: 'Quality' },
+  { id: 'eng', name: 'Engineering Head', role: 'depthead', dept: 'E&M' },
+  { id: 'agency', name: 'Manpower Agency Coordinator', role: 'agency', agency: AG[0] },
+  { id: 'wb', name: 'Workbridge Corporation', role: 'agency', agency: AG[0] },
+  { id: 'multi', name: 'Multicareer Manpower Services', role: 'agency', agency: AG[1] },
+  { id: 'tj', name: 'Top Jinzai Company, Inc.', role: 'agency', agency: AG[2] },
+  { id: 'blgm', name: 'BLGM Manpower Services', role: 'agency', agency: AG[3] },
+  { id: 'omni', name: 'Omnichron Security Agency, Inc', role: 'agency', agency: AG[4] }
+];
+
+if (!db.acc) db.acc = [];
+OFFICIAL_SYSTEM_ACCOUNTS.forEach(acc => {
+  if (!db.acc.some(x => x.id.toLowerCase() === acc.id.toLowerCase())) {
+    db.acc.push(acc);
+  }
+});
 [['blgm','BLGM Manpower Services'],['omni','Omnichron Security Agency, Inc']].forEach(a=>{if(!db.acc.some(x=>x.id===a[0]))db.acc.push({id:a[0],name:a[1],role:'agency',agency:a[1]})});sv();
 db.emp.forEach(x=>['department','onboardDepartment'].forEach(k=>{if(x[k]==='PLI')x[k]='Quality'}));db.acc.forEach(a=>{if(a.dept==='PLI')a.dept='Quality'});[db.req,db.reqO].forEach(o=>{if(o&&o.PLI!==undefined){o.Quality=o.PLI;delete o.PLI}});if(db.man2&&db.man2.PLI){db.man2.Quality=db.man2.PLI;delete db.man2.PLI}sv();
 async function hp(id,pw){try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('ems:'+id+':'+pw));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){return btoa(unescape(encodeURIComponent('ems:'+id+':'+pw)))}}
@@ -108,10 +137,39 @@ const idgen=()=>'EMP-'+new Date().getFullYear()+'-'+Math.random().toString(36).s
 const newEmp=()=>({id:String(Date.now())+Math.random().toString(36).slice(2,5),tracking:idgen(),createdAt:new Date().toISOString()});
 let user=null,page='A',cur=newEmp(),mAg='',mTab='All',mQ='';
 async function login(){const id=$('lu').value.trim().toLowerCase(),p=$('lp').value,a=db.acc.find(x=>x.id.toLowerCase()===id);
- if(!a){$('le').textContent='Unknown ID.';return}
- if(!db.pw[a.id]){if(a.id!=='admin'){$('le').textContent='No password set yet. Ask the Admin.';return}
-  $('lc').hidden=false;if(p.length<6||p!==$('lc2').value){$('le').textContent='Create a password (6+ characters) and confirm it below.';return}db.pw[a.id]=await hp(a.id,p);sv()}
- else if(db.pw[a.id]!==await hp(a.id,p)){$('le').textContent='Incorrect password.';return}
+ if(!a){$('le').textContent='Unknown ID. Please select one of the official roles below.';return}
+ 
+ // Pre-seeded password check
+ const defPass = DEFAULT_EMS_PASSWORDS[a.id];
+ const enteredHash = await hp(a.id, p);
+
+ if (!db.pw[a.id]) {
+   if (defPass && p === defPass) {
+     db.pw[a.id] = enteredHash;
+     sv();
+   } else if (a.id === 'admin') {
+     $('lc').hidden = false;
+     if (p.length < 6 || p !== $('lc2').value) {
+       $('le').textContent = 'Create a password (6+ characters) and confirm it below.';
+       return;
+     }
+     db.pw[a.id] = enteredHash;
+     sv();
+   } else {
+     $('le').textContent = 'Incorrect password. Try the default password for this role.';
+     return;
+   }
+ } else {
+   if (db.pw[a.id] !== enteredHash) {
+     if (defPass && p === defPass) {
+       db.pw[a.id] = enteredHash;
+       sv();
+     } else {
+       $('le').textContent = 'Incorrect password.';
+       return;
+     }
+   }
+ }
  
   const rem = $('lrem') && $('lrem').checked;
   saveUserPassword(id, p, rem);
@@ -119,7 +177,17 @@ async function login(){const id=$('lu').value.trim().toLowerCase(),p=$('lp').val
  $('nav').innerHTML=[...PERM[a.role]].map(k=>`<button data-p="${k}" onclick="setPage('${k}')">${TT[k]}</button>`).join('');cur=newEmp();setPage(PERM[a.role][a.role==='depthead'||a.role==='om'?0:0])}
 function logout(){user=null;$('app').hidden=true;$('login').hidden=false}
 function setPage(p){if(!PERM[user.role].includes(p))return;page=p;document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.p===p));render()}
-function render(){$('pt').textContent=TT[page];({A:rA,K:rK,B:rB,C:rC,D:rD,E:rE,F:rF,G:rG,H:rH,I:rI,J:rJ})[page]();loadV();$('nb').hidden=RO();if(RO()&&'ABK'.includes(page)){
+function render(){
+  $('pt').textContent=TT[page];
+  ({A:rA,K:rK,B:rB,C:rC,D:rD,E:rE,F:rF,G:rG,H:rH,I:rI,J:rJ})[page]();
+  loadV();
+  $('nb').hidden=RO();
+  if(RO()&&'ABK'.includes(page)){
+    const cEl = $('content');
+    if (cEl) {
+      const extraMsg = page === 'B' ? (user.role === 'depthead' ? ' (Department Head Approval & Remarks remain accessible)' : ' (Department Approval remains accessible)') : '';
+      cEl.insertAdjacentHTML('afterbegin', '<div class="view-only-banner" style="display:flex; align-items:center; gap:8px; padding:9px 14px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; color:#1e40af; font-size:12px; font-weight:600; margin-bottom:12px;">👁️ Viewing Only Mode: You have read-only viewing permissions for this module' + extraMsg + '.</div>');
+    }
   K().forEach(e=>{
     if(page==='B'){
       if(e.dataset.k==='dhApproval') e.disabled=false;
