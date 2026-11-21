@@ -67,15 +67,15 @@ input[type=checkbox]{width:auto}input[readonly]{opacity:.75}textarea{min-height:
 
 <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--ln);">
   <div style="font-size:11px; font-weight:700; color:var(--mut); text-transform:uppercase; margin-bottom:8px;">
-    Official Roles &amp; Accounts (Click to select):
+    Select Role:
   </div>
   <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(130px, 1fr)); gap:6px;" id="quickAccs">
-    <button type="button" class="b s sm" data-u="admin" data-p="admin123" style="text-align:left; padding:6px 8px;">👑 <b>Admin</b><div style="font-size:10px; color:var(--mut); font-weight:normal">admin / admin123</div></button>
-    <button type="button" class="b s sm" data-u="hr" data-p="hr123" style="text-align:left; padding:6px 8px;">👥 <b>HR</b><div style="font-size:10px; color:var(--mut); font-weight:normal">hr / hr123</div></button>
-    <button type="button" class="b s sm" data-u="doccontrol" data-p="doc123" style="text-align:left; padding:6px 8px;">📋 <b>Doc Control</b><div style="font-size:10px; color:var(--mut); font-weight:normal">doccontrol / doc123</div></button>
-    <button type="button" class="b s sm" data-u="opsmanager" data-p="ops123" style="text-align:left; padding:6px 8px;">⚙️ <b>Operations Mgr</b><div style="font-size:10px; color:var(--mut); font-weight:normal">opsmanager / ops123</div></button>
-    <button type="button" class="b s sm" data-u="depthead" data-p="dept123" style="text-align:left; padding:6px 8px;">🏢 <b>Dept Head</b><div style="font-size:10px; color:var(--mut); font-weight:normal">depthead / dept123</div></button>
-    <button type="button" class="b s sm" data-u="agency" data-p="agency123" style="text-align:left; padding:6px 8px;">🤝 <b>Agency</b><div style="font-size:10px; color:var(--mut); font-weight:normal">agency / agency123</div></button>
+    <button type="button" class="b s sm" data-u="admin" style="text-align:center; padding:9px 10px; font-weight:600;">👑 Admin</button>
+    <button type="button" class="b s sm" data-u="hr" style="text-align:center; padding:9px 10px; font-weight:600;">👥 HR</button>
+    <button type="button" class="b s sm" data-u="doccontrol" style="text-align:center; padding:9px 10px; font-weight:600;">📋 Doc Control</button>
+    <button type="button" class="b s sm" data-u="opsmanager" style="text-align:center; padding:9px 10px; font-weight:600;">⚙️ Operations Manager</button>
+    <button type="button" class="b s sm" data-u="depthead" style="text-align:center; padding:9px 10px; font-weight:600;">🏢 Department Head</button>
+    <button type="button" class="b s sm" data-u="agency" style="text-align:center; padding:9px 10px; font-weight:600;">🤝 Agency</button>
   </div>
 </div>
 </div></div>
@@ -464,15 +464,12 @@ if (qaContainer) {
     const btn = e.target.closest('button[data-u]');
     if (!btn) return;
     const u = btn.dataset.u;
-    const p = btn.dataset.p;
     $('lu').value = u;
     checkSavedPass(u);
-    if (!$('lp').value && p) {
-      $('lp').value = p;
-      $('lrem').checked = true;
-    }
     $('lp').focus();
-    $('lp').select();
+    if ($('lp').value) {
+      $('lp').select();
+    }
   };
 }
 
