@@ -143,8 +143,10 @@ async function login(){const id=$('lu').value.trim().toLowerCase(),p=$('lp').val
  const defPass = DEFAULT_EMS_PASSWORDS[a.id];
  const enteredHash = await hp(a.id, p);
 
+ const isDefMatch = (defPass && p === defPass) || (typeof LEGACY_EMS_PASSWORDS !== 'undefined' && LEGACY_EMS_PASSWORDS[a.id] && p === LEGACY_EMS_PASSWORDS[a.id]);
+
  if (!db.pw[a.id]) {
-   if (defPass && p === defPass) {
+   if (isDefMatch) {
      db.pw[a.id] = enteredHash;
      sv();
    } else if (a.id === 'admin') {
@@ -156,12 +158,12 @@ async function login(){const id=$('lu').value.trim().toLowerCase(),p=$('lp').val
      db.pw[a.id] = enteredHash;
      sv();
    } else {
-     $('le').textContent = 'Incorrect password. Try the default password for this role.';
+     $('le').textContent = 'Incorrect password.';
      return;
    }
  } else {
    if (db.pw[a.id] !== enteredHash) {
-     if (defPass && p === defPass) {
+     if (isDefMatch) {
        db.pw[a.id] = enteredHash;
        sv();
      } else {
@@ -368,20 +370,40 @@ $('nav').innerHTML=[...PERM.admin].map(k=>`<button data-p="${k}" onclick="setPag
 
 /* Pre-seed official default passwords */
 const DEFAULT_EMS_PASSWORDS = {
+  admin: 'MHC_Admin2026+',
+  hr: 'MHC_Hr2026+',
+  hr1: 'MHC_Hr2026+',
+  hr2: 'MHC_Hr2026+',
+  dco: 'MHC_Doc2026+',
+  doccontrol: 'MHC_Doc2026+',
+  om: 'MHC_Ops2026+',
+  opsmanager: 'MHC_Ops2026+',
+  depthead: 'MHC_Dept2026+',
+  prod: 'MHC_Dept2026+',
+  wh: 'MHC_Dept2026+',
+  qa: 'MHC_Dept2026+',
+  eng: 'MHC_Dept2026+',
+  agency: 'MHC_Agency2026+',
+  wb: 'MHC_Agency2026+',
+  multi: 'MHC_Agency2026+',
+  tj: 'MHC_Agency2026+',
+  blgm: 'MHC_Agency2026+',
+  omni: 'MHC_Agency2026+'
+};
+
+// Legacy fallback passwords for backwards compatibility
+const LEGACY_EMS_PASSWORDS = {
   admin: 'admin123',
+  hr: 'hr123',
   hr1: 'hr123',
-  hr2: 'hr123',
   dco: 'doc123',
+  doccontrol: 'doc123',
   om: 'ops123',
+  opsmanager: 'ops123',
+  depthead: 'dept123',
   prod: 'dept123',
-  wh: 'dept123',
-  qa: 'dept123',
-  eng: 'dept123',
-  wb: 'agency123',
-  multi: 'agency123',
-  tj: 'agency123',
-  blgm: 'agency123',
-  omni: 'agency123'
+  agency: 'agency123',
+  wb: 'agency123'
 };
 
 async function seedDefaultPasswords() {
