@@ -158,6 +158,9 @@
           try {
             const fresh = JSON.parse(localStorage.getItem(STORAGE_KEY));
             Object.assign(db, fresh);
+            if (typeof ensureSystemAccounts === 'function') {
+              ensureSystemAccounts();
+            }
           } catch (_) {}
         }
         const isEditing = document.activeElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName) && document.activeElement.closest('#content');

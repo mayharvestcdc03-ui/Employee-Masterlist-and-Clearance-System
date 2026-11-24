@@ -30,20 +30,147 @@ const MIME_TYPES = {
   '.ico': 'image/x-icon'
 };
 
+const OFFICIAL_SYSTEM_ACCOUNTS = [
+  {
+    "id": "admin",
+    "name": "System Administrator",
+    "role": "admin",
+    "dept": ""
+  },
+  {
+    "id": "hr",
+    "name": "HR Department",
+    "role": "hr",
+    "dept": ""
+  },
+  {
+    "id": "hr1",
+    "name": "HR Officer 1",
+    "role": "hr",
+    "dept": ""
+  },
+  {
+    "id": "hr2",
+    "name": "HR Officer 2",
+    "role": "hr",
+    "dept": ""
+  },
+  {
+    "id": "doccontrol",
+    "name": "Document Control Officer",
+    "role": "dco",
+    "dept": ""
+  },
+  {
+    "id": "dco",
+    "name": "Document Control Officer",
+    "role": "dco",
+    "dept": ""
+  },
+  {
+    "id": "opsmanager",
+    "name": "Operations Manager",
+    "role": "om",
+    "dept": ""
+  },
+  {
+    "id": "om",
+    "name": "Operations Manager",
+    "role": "om",
+    "dept": ""
+  },
+  {
+    "id": "depthead",
+    "name": "Department Head",
+    "role": "depthead",
+    "dept": "Production"
+  },
+  {
+    "id": "prod",
+    "name": "Production Head",
+    "role": "depthead",
+    "dept": "Production"
+  },
+  {
+    "id": "wh",
+    "name": "Warehouse Head",
+    "role": "depthead",
+    "dept": "Warehouse"
+  },
+  {
+    "id": "qa",
+    "name": "Quality Head",
+    "role": "depthead",
+    "dept": "Quality"
+  },
+  {
+    "id": "eng",
+    "name": "Engineering Head",
+    "role": "depthead",
+    "dept": "E&M"
+  },
+  {
+    "id": "agency",
+    "name": "Manpower Agency Coordinator",
+    "role": "agency",
+    "agency": "Workbridge Corporation"
+  },
+  {
+    "id": "wb",
+    "name": "Workbridge Corporation",
+    "role": "agency",
+    "agency": "Workbridge Corporation"
+  },
+  {
+    "id": "multi",
+    "name": "Multicareer Manpower Services",
+    "role": "agency",
+    "agency": "Multicareer Manpower Services"
+  },
+  {
+    "id": "tj",
+    "name": "Top Jinzai Company, Inc.",
+    "role": "agency",
+    "agency": "Top Jinzai Company, Inc."
+  },
+  {
+    "id": "blgm",
+    "name": "BLGM Manpower Services",
+    "role": "agency",
+    "agency": "BLGM Manpower Services"
+  },
+  {
+    "id": "omni",
+    "name": "Omnichron Security Agency, Inc",
+    "role": "agency",
+    "agency": "Omnichron Security Agency, Inc"
+  }
+];
+
+function ensureAccounts(data) {
+  if (!data.acc || !Array.isArray(data.acc)) data.acc = [];
+  OFFICIAL_SYSTEM_ACCOUNTS.forEach(acc => {
+    if (!data.acc.some(x => x.id && x.id.toLowerCase() === acc.id.toLowerCase())) {
+      data.acc.push(Object.assign({}, acc));
+    }
+  });
+}
+
 function getInitialState() {
-  return {
+  const state = {
     emp: [],
     items: [],
     pw: {},
     dc: {},
     dcl: [],
-    acc: [],
+    acc: OFFICIAL_SYSTEM_ACCOUNTS.map(a => Object.assign({}, a)),
     req: {},
     reqInfo: null,
     reqO: {},
     man2: {},
     lastUpdated: new Date().toISOString()
   };
+  return state;
 }
 
 function loadDatabase() {

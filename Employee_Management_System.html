@@ -136,7 +136,21 @@ const ft=i=>i?new Date(i).toLocaleString('en-PH',{dateStyle:'medium',timeStyle:'
 const idgen=()=>'EMP-'+new Date().getFullYear()+'-'+Math.random().toString(36).slice(2,7).toUpperCase();
 const newEmp=()=>({id:String(Date.now())+Math.random().toString(36).slice(2,5),tracking:idgen(),createdAt:new Date().toISOString()});
 let user=null,page='A',cur=newEmp(),mAg='',mTab='All',mQ='';
-async function login(){const id=$('lu').value.trim().toLowerCase(),p=$('lp').value,a=db.acc.find(x=>x.id.toLowerCase()===id);
+
+function ensureSystemAccounts() {
+  if (typeof db === 'undefined' || !db) return;
+  if (!db.acc || !Array.isArray(db.acc)) db.acc = [];
+  if (typeof OFFICIAL_SYSTEM_ACCOUNTS !== 'undefined') {
+    OFFICIAL_SYSTEM_ACCOUNTS.forEach(acc => {
+      if (!db.acc.some(x => x.id && x.id.toLowerCase() === acc.id.toLowerCase())) {
+        db.acc.push(Object.assign({}, acc));
+      }
+    });
+  }
+}
+
+async function login(){ ensureSystemAccounts();
+const id=$('lu').value.trim().toLowerCase(),p=$('lp').value,a=db.acc.find(x=>x.id.toLowerCase()===id);
  if(!a){$('le').textContent='Unknown ID. Please select one of the official roles below.';return}
  
  // Pre-seeded password check
@@ -538,6 +552,7 @@ function saveUserPassword(u, p, remember) {
   } catch(e) {}
 }
 function checkSavedPass(u) {
+  ensureSystemAccounts();
   u = (u || '').toLowerCase().trim();
   const map = getSavedPasswords();
   const pInput = $('lp'), remChk = $('lrem'), forgetBtn = $('lforget');
