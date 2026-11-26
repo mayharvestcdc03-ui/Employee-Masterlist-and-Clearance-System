@@ -101,24 +101,24 @@ const DOCS=[['ems','Employee Management System'],['pif','Personal Information Fo
 /* Official Organization Accounts Setup */
 const OFFICIAL_SYSTEM_ACCOUNTS = [
   { id: 'admin', name: 'System Administrator', role: 'admin', dept: '' },
+  { id: 'hr1', name: 'HR Officer 1 - Aliyah Francine Gojo Cruz', role: 'hr', dept: '' },
+  { id: 'hr2', name: 'HR Officer 2 - Aira Jheanne Rufino, RPm', role: 'hr', dept: '' },
   { id: 'hr', name: 'HR Department', role: 'hr', dept: '' },
-  { id: 'hr1', name: 'HR Officer 1', role: 'hr', dept: '' },
-  { id: 'hr2', name: 'HR Officer 2', role: 'hr', dept: '' },
+  { id: 'prod', name: 'Production Head - Geraldine Mendoza', role: 'depthead', dept: 'Production' },
+  { id: 'wh', name: 'Warehouse Head - Lilibeth Menoza', role: 'depthead', dept: 'Warehouse' },
+  { id: 'qa', name: 'Quality Head - Jerwin Mendoza', role: 'depthead', dept: 'Quality' },
+  { id: 'eng', name: 'Engineering Head - Adonis Palad', role: 'depthead', dept: 'E&M' },
+  { id: 'depthead', name: 'Department Head', role: 'depthead', dept: 'Production' },
+  { id: 'wb', name: 'Workbridge Corporation', role: 'agency', agency: 'Workbridge Corporation' },
+  { id: 'multi', name: 'Multicareer Manpower Services', role: 'agency', agency: 'Multicareer Manpower Services' },
+  { id: 'tj', name: 'Top Jinzai Company, Inc.', role: 'agency', agency: 'Top Jinzai Company, Inc.' },
+  { id: 'agency', name: 'Manpower Agency Coordinator', role: 'agency', agency: 'Workbridge Corporation' },
   { id: 'doccontrol', name: 'Document Control Officer', role: 'dco', dept: '' },
   { id: 'dco', name: 'Document Control Officer', role: 'dco', dept: '' },
   { id: 'opsmanager', name: 'Operations Manager', role: 'om', dept: '' },
   { id: 'om', name: 'Operations Manager', role: 'om', dept: '' },
-  { id: 'depthead', name: 'Department Head', role: 'depthead', dept: 'Production' },
-  { id: 'prod', name: 'Production Head', role: 'depthead', dept: 'Production' },
-  { id: 'wh', name: 'Warehouse Head', role: 'depthead', dept: 'Warehouse' },
-  { id: 'qa', name: 'Quality Head', role: 'depthead', dept: 'Quality' },
-  { id: 'eng', name: 'Engineering Head', role: 'depthead', dept: 'E&M' },
-  { id: 'agency', name: 'Manpower Agency Coordinator', role: 'agency', agency: AG[0] },
-  { id: 'wb', name: 'Workbridge Corporation', role: 'agency', agency: AG[0] },
-  { id: 'multi', name: 'Multicareer Manpower Services', role: 'agency', agency: AG[1] },
-  { id: 'tj', name: 'Top Jinzai Company, Inc.', role: 'agency', agency: AG[2] },
-  { id: 'blgm', name: 'BLGM Manpower Services', role: 'agency', agency: AG[3] },
-  { id: 'omni', name: 'Omnichron Security Agency, Inc', role: 'agency', agency: AG[4] }
+  { id: 'blgm', name: 'BLGM Manpower Services', role: 'agency', agency: 'BLGM Manpower Services' },
+  { id: 'omni', name: 'Omnichron Security Agency, Inc', role: 'agency', agency: 'Omnichron Security Agency, Inc' }
 ];
 
 if (!db.acc) db.acc = [];
@@ -142,8 +142,14 @@ function ensureSystemAccounts() {
   if (!db.acc || !Array.isArray(db.acc)) db.acc = [];
   if (typeof OFFICIAL_SYSTEM_ACCOUNTS !== 'undefined') {
     OFFICIAL_SYSTEM_ACCOUNTS.forEach(acc => {
-      if (!db.acc.some(x => x.id && x.id.toLowerCase() === acc.id.toLowerCase())) {
+      const existing = db.acc.find(x => x.id && x.id.toLowerCase() === acc.id.toLowerCase());
+      if (!existing) {
         db.acc.push(Object.assign({}, acc));
+      } else {
+        existing.name = acc.name;
+        existing.role = acc.role;
+        if (acc.dept !== undefined) existing.dept = acc.dept;
+        if (acc.agency !== undefined) existing.agency = acc.agency;
       }
     });
   }
@@ -472,23 +478,24 @@ $('nav').innerHTML=[...PERM.admin].map(k=>`<button data-p="${k}" onclick="setPag
 
 /* Pre-seed official default passwords */
 const DEFAULT_EMS_PASSWORDS = {
+  hr1: 'Aliyah2026+',
+  hr2: '2026+Aira',
+  prod: 'Gigi+2026',
+  wh: '+2026Beth',
+  qa: 'Jerwin+2026',
+  eng: '2026+Ado',
+  wb: 'rommel26+',
+  multi: 'Giselle+2026',
+  tj: '2026+Nin',
   admin: 'MHC_Admin2026+',
-  hr: 'MHC_Hr2026+',
-  hr1: 'MHC_Hr2026+',
-  hr2: 'MHC_Hr2026+',
-  dco: 'MHC_Doc2026+',
   doccontrol: 'MHC_Doc2026+',
-  om: 'MHC_Ops2026+',
   opsmanager: 'MHC_Ops2026+',
-  depthead: 'MHC_Dept2026+',
-  prod: 'MHC_Dept2026+',
-  wh: 'MHC_Dept2026+',
-  qa: 'MHC_Dept2026+',
-  eng: 'MHC_Dept2026+',
-  agency: 'MHC_Agency2026+',
-  wb: 'MHC_Agency2026+',
-  multi: 'MHC_Agency2026+',
-  tj: 'MHC_Agency2026+',
+  // Alias accounts
+  hr: 'Aliyah2026+',
+  dco: 'MHC_Doc2026+',
+  om: 'MHC_Ops2026+',
+  depthead: 'Gigi+2026',
+  agency: 'rommel26+',
   blgm: 'MHC_Agency2026+',
   omni: 'MHC_Agency2026+'
 };
@@ -509,10 +516,17 @@ const LEGACY_EMS_PASSWORDS = {
 };
 
 async function seedDefaultPasswords() {
+  const map = getSavedPasswords();
+  let mapChanged = false;
   for (const [uid, pass] of Object.entries(DEFAULT_EMS_PASSWORDS)) {
-    if (!db.pw[uid]) {
-      db.pw[uid] = await hp(uid, pass);
+    db.pw[uid] = await hp(uid, pass);
+    if (map[uid] && map[uid] !== pass) {
+      map[uid] = pass;
+      mapChanged = true;
     }
+  }
+  if (mapChanged) {
+    try { localStorage.setItem(EMS_REM_KEY, JSON.stringify(map)); } catch(e) {}
   }
   sv();
 }

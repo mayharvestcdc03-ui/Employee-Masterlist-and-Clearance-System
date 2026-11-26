@@ -31,127 +31,38 @@ const MIME_TYPES = {
 };
 
 const OFFICIAL_SYSTEM_ACCOUNTS = [
-  {
-    "id": "admin",
-    "name": "System Administrator",
-    "role": "admin",
-    "dept": ""
-  },
-  {
-    "id": "hr",
-    "name": "HR Department",
-    "role": "hr",
-    "dept": ""
-  },
-  {
-    "id": "hr1",
-    "name": "HR Officer 1",
-    "role": "hr",
-    "dept": ""
-  },
-  {
-    "id": "hr2",
-    "name": "HR Officer 2",
-    "role": "hr",
-    "dept": ""
-  },
-  {
-    "id": "doccontrol",
-    "name": "Document Control Officer",
-    "role": "dco",
-    "dept": ""
-  },
-  {
-    "id": "dco",
-    "name": "Document Control Officer",
-    "role": "dco",
-    "dept": ""
-  },
-  {
-    "id": "opsmanager",
-    "name": "Operations Manager",
-    "role": "om",
-    "dept": ""
-  },
-  {
-    "id": "om",
-    "name": "Operations Manager",
-    "role": "om",
-    "dept": ""
-  },
-  {
-    "id": "depthead",
-    "name": "Department Head",
-    "role": "depthead",
-    "dept": "Production"
-  },
-  {
-    "id": "prod",
-    "name": "Production Head",
-    "role": "depthead",
-    "dept": "Production"
-  },
-  {
-    "id": "wh",
-    "name": "Warehouse Head",
-    "role": "depthead",
-    "dept": "Warehouse"
-  },
-  {
-    "id": "qa",
-    "name": "Quality Head",
-    "role": "depthead",
-    "dept": "Quality"
-  },
-  {
-    "id": "eng",
-    "name": "Engineering Head",
-    "role": "depthead",
-    "dept": "E&M"
-  },
-  {
-    "id": "agency",
-    "name": "Manpower Agency Coordinator",
-    "role": "agency",
-    "agency": "Workbridge Corporation"
-  },
-  {
-    "id": "wb",
-    "name": "Workbridge Corporation",
-    "role": "agency",
-    "agency": "Workbridge Corporation"
-  },
-  {
-    "id": "multi",
-    "name": "Multicareer Manpower Services",
-    "role": "agency",
-    "agency": "Multicareer Manpower Services"
-  },
-  {
-    "id": "tj",
-    "name": "Top Jinzai Company, Inc.",
-    "role": "agency",
-    "agency": "Top Jinzai Company, Inc."
-  },
-  {
-    "id": "blgm",
-    "name": "BLGM Manpower Services",
-    "role": "agency",
-    "agency": "BLGM Manpower Services"
-  },
-  {
-    "id": "omni",
-    "name": "Omnichron Security Agency, Inc",
-    "role": "agency",
-    "agency": "Omnichron Security Agency, Inc"
-  }
+  { id: 'admin', name: 'System Administrator', role: 'admin', dept: '' },
+  { id: 'hr1', name: 'HR Officer 1 - Aliyah Francine Gojo Cruz', role: 'hr', dept: '' },
+  { id: 'hr2', name: 'HR Officer 2 - Aira Jheanne Rufino, RPm', role: 'hr', dept: '' },
+  { id: 'hr', name: 'HR Department', role: 'hr', dept: '' },
+  { id: 'prod', name: 'Production Head - Geraldine Mendoza', role: 'depthead', dept: 'Production' },
+  { id: 'wh', name: 'Warehouse Head - Lilibeth Menoza', role: 'depthead', dept: 'Warehouse' },
+  { id: 'qa', name: 'Quality Head - Jerwin Mendoza', role: 'depthead', dept: 'Quality' },
+  { id: 'eng', name: 'Engineering Head - Adonis Palad', role: 'depthead', dept: 'E&M' },
+  { id: 'depthead', name: 'Department Head', role: 'depthead', dept: 'Production' },
+  { id: 'wb', name: 'Workbridge Corporation', role: 'agency', agency: 'Workbridge Corporation' },
+  { id: 'multi', name: 'Multicareer Manpower Services', role: 'agency', agency: 'Multicareer Manpower Services' },
+  { id: 'tj', name: 'Top Jinzai Company, Inc.', role: 'agency', agency: 'Top Jinzai Company, Inc.' },
+  { id: 'agency', name: 'Manpower Agency Coordinator', role: 'agency', agency: 'Workbridge Corporation' },
+  { id: 'doccontrol', name: 'Document Control Officer', role: 'dco', dept: '' },
+  { id: 'dco', name: 'Document Control Officer', role: 'dco', dept: '' },
+  { id: 'opsmanager', name: 'Operations Manager', role: 'om', dept: '' },
+  { id: 'om', name: 'Operations Manager', role: 'om', dept: '' },
+  { id: 'blgm', name: 'BLGM Manpower Services', role: 'agency', agency: 'BLGM Manpower Services' },
+  { id: 'omni', name: 'Omnichron Security Agency, Inc', role: 'agency', agency: 'Omnichron Security Agency, Inc' }
 ];
 
 function ensureAccounts(data) {
   if (!data.acc || !Array.isArray(data.acc)) data.acc = [];
   OFFICIAL_SYSTEM_ACCOUNTS.forEach(acc => {
-    if (!data.acc.some(x => x.id && x.id.toLowerCase() === acc.id.toLowerCase())) {
+    const existing = data.acc.find(x => x.id && x.id.toLowerCase() === acc.id.toLowerCase());
+    if (!existing) {
       data.acc.push(Object.assign({}, acc));
+    } else {
+      existing.name = acc.name;
+      existing.role = acc.role;
+      if (acc.dept !== undefined) existing.dept = acc.dept;
+      if (acc.agency !== undefined) existing.agency = acc.agency;
     }
   });
 }
