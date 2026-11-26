@@ -25,6 +25,28 @@
   let syncTimeout = null;
 
   // Initialize Supabase Client
+  
+  // Supabase Realtime Listener for Instant Multi-Device Sync
+  function setupRealtimeListener() {
+    if (supabaseClient && supabaseClient.channel) {
+      try {
+        supabaseClient.channel('party_sync_realtime')
+          .on('postgres_changes', {
+            event: '*',
+            schema: 'public',
+            table: 'party_sync',
+            filter: `room=eq.${SUPABASE_ROOM}`
+          }, payload => {
+            console.log('[MHC] Instant cloud sync event received from Supabase!');
+            pullDataFromClouds();
+          })
+          .subscribe();
+      } catch (e) {
+        console.warn('[MHC] Realtime listener init error:', e);
+      }
+    }
+  }
+
   function initSupabase() {
     try {
       if (window.supabase && window.supabase.createClient) {
@@ -214,6 +236,7 @@
 
   // Startup
   initSupabase();
+  setupRealtimeListener();
   setTimeout(pullDataFromClouds, 800);
   setInterval(pullDataFromClouds, SYNC_INTERVAL_MS);
 

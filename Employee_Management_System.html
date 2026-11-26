@@ -79,13 +79,61 @@ input[type=checkbox]{width:auto}input[readonly]{opacity:.75}textarea{min-height:
   </div>
 </div>
 </div></div>
-<div id="app" hidden><aside class="side"><h2>EMPLOYEE MANAGEMENT</h2><small id="who"></small><nav id="nav"></nav><button onclick="logout()" style="display:block;margin-top:16px;background:#ffffff18;padding:8px 12px;border-radius:8px;border:1px solid #ffffff30;color:#fff;cursor:pointer;width:100%;font-weight:600;font-size:12px;text-align:center;">🚪 Log out / Switch User</button></aside>
+<div id="app" hidden><aside class="side"><h2>EMPLOYEE MANAGEMENT</h2><small id="who"></small><button type="button" onclick="openChangePwModal()" style="display:block;margin:10px 0 14px;background:#ffffff22;padding:7px 10px;border-radius:8px;border:1px solid #ffffff44;color:#fff;cursor:pointer;width:100%;font-weight:700;font-size:12px;text-align:center;transition:background 0.2s;" onmouseover="this.style.background='#ffffff35'" onmouseout="this.style.background='#ffffff22'">🔑 Change Password / PIN</button><nav id="nav"></nav><button onclick="logout()" style="display:block;margin-top:16px;background:#ffffff18;padding:8px 12px;border-radius:8px;border:1px solid #ffffff30;color:#fff;cursor:pointer;width:100%;font-weight:600;font-size:12px;text-align:center;">🚪 Log out / Switch User</button></aside>
 <main><div class="top"><h1 id="pt"></h1><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="b s" onclick="exportCSV()">Export records</button><button class="b" id="nb" onclick="newRec()">+ New record</button></div></div><div id="content"></div></main></div>
+
+<!-- Change Password / PIN Modal -->
+<div id="changePwModal" style="display:none; position:fixed; inset:0; z-index:99999; background:rgba(10,25,50,0.7); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); align-items:center; justify-content:center; padding:16px;">
+  <div style="background:#fff; border-radius:16px; max-width:400px; width:100%; padding:24px; box-shadow:0 15px 40px rgba(0,0,0,0.3); border:1px solid var(--ln);">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+      <h3 style="margin:0; font-size:1.15rem; color:var(--ink); display:flex; align-items:center; gap:8px;">
+        <span>🔑</span> Change Password / PIN
+      </h3>
+      <button type="button" onclick="closeChangePwModal()" style="background:none; border:none; font-size:1.4rem; line-height:1; cursor:pointer; color:var(--mut);">&times;</button>
+    </div>
+    
+    <p style="font-size:0.85rem; color:var(--mut); margin-bottom:16px;">
+      Updating credentials for: <b id="cpUserDisplay" style="color:var(--pri);"></b>
+    </p>
+    
+    <div class="f" id="cpOldGroup" style="margin-bottom:12px;">
+      <label>Current Password / PIN *</label>
+      <div style="position:relative;">
+        <input type="password" id="cpOld" placeholder="Enter current password" style="width:100%; padding-right:40px;">
+        <button type="button" onclick="toggleFieldVis('cpOld', this)" style="position:absolute; right:8px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--mut);">👁️</button>
+      </div>
+    </div>
+
+    <div class="f" style="margin-bottom:12px;">
+      <label>New Password / PIN (6+ characters) *</label>
+      <div style="position:relative;">
+        <input type="password" id="cpNew" placeholder="Enter new password" style="width:100%; padding-right:40px;">
+        <button type="button" onclick="toggleFieldVis('cpNew', this)" style="position:absolute; right:8px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--mut);">👁️</button>
+      </div>
+    </div>
+
+    <div class="f" style="margin-bottom:16px;">
+      <label>Confirm New Password / PIN *</label>
+      <div style="position:relative;">
+        <input type="password" id="cpConfirm" placeholder="Confirm new password" style="width:100%; padding-right:40px;">
+        <button type="button" onclick="toggleFieldVis('cpConfirm', this)" style="position:absolute; right:8px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:var(--mut);">👁️</button>
+      </div>
+    </div>
+
+    <p id="cpErr" style="color:var(--err, #dc2626); font-size:0.82rem; font-weight:700; margin-bottom:12px; display:none;"></p>
+
+    <div style="display:flex; gap:10px; justify-content:flex-end;">
+      <button type="button" class="b s sm" onclick="closeChangePwModal()">Cancel</button>
+      <button type="button" class="b sm" id="cpSaveBtn" onclick="submitChangePassword()">Save &amp; Sync to Cloud</button>
+    </div>
+  </div>
+</div>
+
 <div id="toast"></div>
 <script>
 const $=id=>document.getElementById(id),esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const KEY='ems_v2';let db=null;try{db=JSON.parse(localStorage.getItem(KEY))}catch(e){}
-db=db||{};db.emp=db.emp||[];db.items=db.items||[];db.pw=db.pw||{};db.dc=db.dc||{};db.dcl=db.dcl||[];
+db=db||{};db.emp=db.emp||[];db.items=db.items||[];db.pw=db.pw||{};db.customPw=db.customPw||{};db.dc=db.dc||{};db.dcl=db.dcl||[];
 const sv=()=>{try{localStorage.setItem(KEY,JSON.stringify(db))}catch(e){}};
 const AG=['Workbridge Corporation','Multicareer Manpower Services','Top Jinzai Company, Inc.','BLGM Manpower Services','Omnichron Security Agency, Inc'],AGM=AG.slice(0,3);
 const DEPTS=['Basic','Further','Blast','CCM','Warehouse','E&M','Quality','Scaler','Dry warehouse','PFRP','24 Chicken','Utility','Canteen','Admin','Security','Production'];
@@ -462,7 +510,40 @@ function doUp(){up.forEach(o=>db.emp.push({...newEmp(),...o,employmentStatus:o.e
 function rH(){const O=(l,v)=>l.map(x=>`<option${x===v?' selected':''}>${esc(x)}</option>`).join('');$('content').innerHTML=`<div class="pn"><h2>Accounts</h2><p class="sub">Each person has their own ID. Edit details, set or reset passwords, add or remove accounts. Department heads see only the department assigned here.</p><div class="tw"><table><tr><th>ID</th><th>Name</th><th>Role</th><th>Agency / Department</th><th>Password</th><th></th></tr>${db.acc.map((a,i)=>`<tr><td>${esc(a.id)}</td><td><input value="${esc(a.name)}" onchange="ea(${i},'name',this.value)"></td><td><select onchange="ea(${i},'role',this.value);rH()">${Object.keys(ROLES).map(k=>`<option value="${k}"${k===a.role?' selected':''}>${ROLES[k]}</option>`).join('')}</select></td><td>${a.role==='agency'?`<select onchange="ea(${i},'agency',this.value)">${O(AG,a.agency)}</select>`:a.role==='depthead'?`<select onchange="ea(${i},'dept',this.value)"><option value="">(none)</option>${O(DEPTS,a.dept)}</select>`:'-'}</td><td>${db.pw[a.id]?'Set':'Not set'}<div style="display:flex;gap:4px;margin-top:4px"><input id="pw${i}" placeholder="new password" style="max-width:130px"><button class="b sm" onclick="setPw(${i})">Set</button></div></td><td>${a.id==='admin'?'':`<button class="b sm d" onclick="delA(${i})">Delete</button>`}</td></tr>`).join('')}</table></div>
 <div class="st" style="margin-top:18px">Add account</div><div class="g3 g"><div class="f"><label>ID</label><input id="na"></div><div class="f"><label>Name</label><input id="nn"></div><div class="f"><label>Role</label><select id="nr">${Object.keys(ROLES).map(k=>`<option value="${k}">${ROLES[k]}</option>`).join('')}</select></div></div><div class="acts"><button class="b" onclick="addA()">Add account</button></div></div>`}
 function ea(i,f,v){db.acc[i][f]=v;sv();if(db.acc[i].id===user.id)user=db.acc[i]}
-async function setPw(i){const v=$('pw'+i).value;if(v.length<6){toast('Use at least 6 characters');return}db.pw[db.acc[i].id]=await hp(db.acc[i].id,v);sv();toast('Password set');rH()}
+async function setPw(i){
+  const v = $('pw' + i).value.trim();
+  if (v.length < 6) {
+    toast('Use at least 6 characters');
+    return;
+  }
+  const uid = db.acc[i].id.toLowerCase();
+  const newHash = await hp(uid, v);
+  db.pw = db.pw || {};
+  db.pw[uid] = newHash;
+  db.customPw = db.customPw || {};
+  db.customPw[uid] = {
+    updatedAt: new Date().toISOString(),
+    changedBy: user ? user.id : 'admin'
+  };
+  const map = getSavedPasswords();
+  if (map[uid]) {
+    map[uid] = v;
+    try { localStorage.setItem(EMS_REM_KEY, JSON.stringify(map)); } catch(e) {}
+  }
+  sv();
+  try {
+    fetch('/api/account/change-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId: uid, newPasswordHash: newHash, changedBy: user ? user.id : 'admin' })
+    }).catch(() => {});
+  } catch(e) {}
+  if (typeof window.mhcSyncNow === 'function') {
+    window.mhcSyncNow();
+  }
+  toast('Password for ' + uid + ' updated and synced to cloud! ✓');
+  rH();
+}
 function delA(i){if(db.acc[i].id===user.id){toast('You cannot delete your own account');return}delete db.pw[db.acc[i].id];db.acc.splice(i,1);sv();rH()}
 function addA(){const id=$('na').value.trim().toLowerCase(),n=$('nn').value.trim();if(!id||!n||db.acc.some(a=>a.id.toLowerCase()===id)){toast('Enter a unique ID and a name');return}db.acc.push({id,name:n,role:$('nr').value,dept:'',agency:AG[0]});sv();rH()}
 function rI(){$('content').innerHTML=`<div class="pn"><h2>Document Control</h2><p class="sub">Enter the Document Code, Revision No. and Effectivity for each controlled document. They show on each form and in the export files. Every change is logged.</p>${DOCS.map(d=>{const c=db.dc[d[0]]||{};return`<div style="border-top:1px solid var(--ln);padding:12px 0"><b>${d[1]}</b><div class="g3 g" style="margin-top:8px"><div class="f"><label>Document code</label><input id="dc_${d[0]}c" value="${esc(c.code)}"></div><div class="f"><label>Revision no.</label><input id="dc_${d[0]}r" value="${esc(c.rev)}"></div><div class="f"><label>Effectivity</label><input id="dc_${d[0]}e" type="date" value="${esc(c.eff)}"></div><div class="f full"><label>Reason for change</label><input id="dc_${d[0]}w"></div></div><div class="acts"><button class="b sm" onclick="saveDC('${d[0]}')">Save</button></div></div>`}).join('')}</div><div class="pn"><h2>Revision history</h2><div class="tw"><table><tr><th>When</th><th>Document</th><th>By</th><th>Code / Rev / Effectivity</th><th>Reason</th></tr>${db.dcl.slice().reverse().map(l=>`<tr><td>${esc(l.at)}</td><td>${esc(l.doc)}</td><td>${esc(l.by)}</td><td>${esc(l.v)}</td><td>${esc(l.why)}</td></tr>`).join('')||'<tr><td colspan=5 class="mut">No revisions yet.</td></tr>'}</table></div></div>`}
@@ -516,13 +597,18 @@ const LEGACY_EMS_PASSWORDS = {
 };
 
 async function seedDefaultPasswords() {
+  db.customPw = db.customPw || {};
   const map = getSavedPasswords();
   let mapChanged = false;
   for (const [uid, pass] of Object.entries(DEFAULT_EMS_PASSWORDS)) {
-    db.pw[uid] = await hp(uid, pass);
-    if (map[uid] && map[uid] !== pass) {
-      map[uid] = pass;
-      mapChanged = true;
+    if (!db.customPw[uid]) {
+      if (!db.pw[uid]) {
+        db.pw[uid] = await hp(uid, pass);
+      }
+      if (map[uid] && map[uid] !== pass) {
+        map[uid] = pass;
+        mapChanged = true;
+      }
     }
   }
   if (mapChanged) {
@@ -594,6 +680,124 @@ if ($('lforget')) {
     $('lforget').style.display = 'none';
     toast('Saved password forgotten for ' + u);
   };
+}
+
+
+/* Change Password / PIN Modal Functions */
+function openChangePwModal() {
+  if (!user) return;
+  $('cpUserDisplay').textContent = user.name + ' (' + user.id + ')';
+  $('cpOld').value = '';
+  $('cpNew').value = '';
+  $('cpConfirm').value = '';
+  $('cpErr').style.display = 'none';
+  $('cpErr').textContent = '';
+  $('changePwModal').style.display = 'flex';
+  $('cpOld').focus();
+}
+
+function closeChangePwModal() {
+  $('changePwModal').style.display = 'none';
+}
+
+function toggleFieldVis(inpId, btn) {
+  const inp = $(inpId);
+  if (!inp) return;
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    inp.type = 'password';
+    btn.textContent = '👁️';
+  }
+  inp.focus();
+}
+
+async function submitChangePassword() {
+  if (!user) return;
+  const uid = user.id.toLowerCase();
+  const oldPw = $('cpOld').value.trim();
+  const newPw = $('cpNew').value.trim();
+  const confPw = $('cpConfirm').value.trim();
+  const errEl = $('cpErr');
+
+  function showErr(msg) {
+    errEl.textContent = msg;
+    errEl.style.display = 'block';
+  }
+
+  if (!newPw || newPw.length < 6) {
+    showErr('New password must be at least 6 characters.');
+    return;
+  }
+
+  if (newPw !== confPw) {
+    showErr('New password and confirm password do not match.');
+    return;
+  }
+
+  // Verify current password
+  const currentHash = db.pw[uid];
+  const enteredOldHash = await hp(uid, oldPw);
+  const defPass = DEFAULT_EMS_PASSWORDS[uid];
+
+  const isOldValid = (currentHash && currentHash === enteredOldHash) ||
+                     (!currentHash && defPass && oldPw === defPass) ||
+                     (user.role === 'admin');
+
+  if (!isOldValid) {
+    showErr('Incorrect current password.');
+    return;
+  }
+
+  const saveBtn = $('cpSaveBtn');
+  saveBtn.disabled = true;
+  saveBtn.textContent = 'Syncing...';
+
+  try {
+    const newHash = await hp(uid, newPw);
+    db.pw = db.pw || {};
+    db.pw[uid] = newHash;
+
+    db.customPw = db.customPw || {};
+    db.customPw[uid] = {
+      updatedAt: new Date().toISOString(),
+      changedBy: user.id
+    };
+
+    const map = getSavedPasswords();
+    if (map[uid]) {
+      map[uid] = newPw;
+      try { localStorage.setItem(EMS_REM_KEY, JSON.stringify(map)); } catch(e) {}
+    }
+
+    sv();
+
+    try {
+      fetch('/api/account/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: uid,
+          newPasswordHash: newHash,
+          changedBy: user.id
+        })
+      }).catch(() => {});
+    } catch(e) {}
+
+    if (typeof window.mhcSyncNow === 'function') {
+      await window.mhcSyncNow();
+    }
+
+    closeChangePwModal();
+    toast('Password / PIN successfully changed and synced to cloud! ✓');
+  } catch (err) {
+    console.error('Password change error:', err);
+    showErr('Failed to sync password. Please try again.');
+  } finally {
+    saveBtn.disabled = false;
+    saveBtn.textContent = 'Save & Sync to Cloud';
+  }
 }
 
 /* Quick Account Buttons */
